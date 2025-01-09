@@ -175,7 +175,8 @@ end
        |>  Enum.map(fn {p, _, _}-> Map.get(inf_types,p) end)
 
 
-
+    param_vars = para
+    |>  Enum.map(fn {p, _, _}-> p end)
 
     #inf_types = if is_typed do %{} else inf_types end
     #IO.inspect inf_types
@@ -191,7 +192,7 @@ end
     #IO.inspect inf_types
     #raise "hell"
 
-    cuda_body = Hok.CudaBackend.gen_cuda(body,inf_types,is_typed,module)
+    cuda_body = Hok.CudaBackend.gen_cuda(body,inf_types,param_vars,module)
     k = Hok.CudaBackend.gen_kernel(fname,param_list,cuda_body)
     accessfunc = Hok.CudaBackend.gen_kernel_call(fname,length(para),Enum.reverse(types_para))
     "\n" <> k <> "\n\n" <> accessfunc
@@ -283,7 +284,7 @@ end
     {"\n" <> k <> "\n\n" <> ptr <> "\n\n" <> get_ptr <> "\n\n", { Map.get(inf_types, :return), types_para}}
   end
   def compile_lambda(_other, _t, _n) do
-    "Cannot compile the anonymous function."
+    raise "Cannot compile the anonymous function."
   end
 
   #################### Compile a function
@@ -338,6 +339,10 @@ end
 defp type_to_list({:integer,_,_}), do: [:int]
 defp type_to_list({:unit,_,_}), do: [:unit]
 defp type_to_list({:float,_,_}), do: [:float]
+defp type_to_list({:double,_,_}), do: [:double]
+defp type_to_list({:tinteger,_,_}), do: [:tint]
+defp type_to_list({:tfloat,_,_}), do: [:tfloat]
+defp type_to_list({:tdouble,_,_}), do: [:tdouble]
 defp type_to_list({:gmatrex,_,_}), do: [:matrex]
 defp type_to_list([type]) do
   ltype = type_to_list(type)
@@ -345,6 +350,15 @@ defp type_to_list([type]) do
 end
 defp type_to_list({:~>,_, [a1,a2]}), do: type_to_list(a1) ++ type_to_list(a2)
 defp type_to_list({x,_,_}), do: raise "Unknown type constructor #{x}"
+def gen_para(p,:tdouble) do
+  "double *#{p}"
+end
+def gen_para(p,:tfloat) do
+  "float *#{p}"
+end
+def gen_para(p,:tint) do
+  "int *#{p}"
+end
 def gen_para(p,:matrex) do
   "float *#{p}"
 end
@@ -353,6 +367,9 @@ def gen_para(p,:float) do
 end
 def gen_para(p,:int) do
   "int #{p}"
+end
+def gen_para(p,:double) do
+  "double #{p}"
 end
 def gen_para(p, {ret,type}) do
   #size = length(list)
@@ -468,12 +485,12 @@ end
 #############################
 
 
-def gen_cuda(body,types,is_typed,module) do
+def gen_cuda(body,types,param_vars,module) do
   # IO.puts "##########################gen cuda"
   # IO.inspect types
  #  IO.puts "############end gen cuda"
    # raise "hell"
-    pid = spawn_link(fn -> types_server([],types,is_typed,module) end)
+    pid = spawn_link(fn -> types_server(param_vars,types,module) end)
     Process.register(pid, :types_server)
     code = gen_body(body)
     send(pid,{:kill})
@@ -660,47 +677,18 @@ def get_module_name() do
   end
 end
 
-def is_arg(func) do
-  send(:types_server,{:is_arg,func,self()})
-  receive do
-    {:is_arg,resp} -> resp
-    _         -> raise "Unknown message from types server."
-  end
-end
+#def is_arg(func) do
+#  send(:types_server,{:is_arg,func,self()})
+#  receive do
+#    {:is_arg,resp} -> resp
+#    _         -> raise "Unknown message from types server."
+#  end
+#end
 
-def types_server(used,types, is_typed,module) do
-   if (is_typed) do
-    receive do
-      {:is_arg, fun, pid} -> #IO.inspect fun
-                             #IO.inspect types
-                            if (nil == Map.get(types,fun)) do
-                                send(pid,{:is_arg,false})
-                                types_server(used,types,is_typed,module)
-                            else
-                                send(pid,{:is_arg,true})
-                                types_server(used,types,is_typed,module)
-                            end
-      {:module,pid} -> send(pid,{:module,module})
-              types_server(used,types,is_typed,module)
-      {:check_var, _var, pid} ->
-          send(pid,{:is_typed})
-          types_server(used,types, is_typed,module)
-      {:check_return,pid} ->  send(pid, Map.get(types,:return))
-                              types_server(used,types, is_typed,module)
-      {:kill} ->
-            :ok
-   end
-  else
+def types_server(used, types, module) do
    receive do
-    {:is_arg, fun, pid} -> if (nil==Map.get(types,fun)) do
-              send(pid,{:is_arg,false})
-              types_server(used,types,is_typed,module)
-          else
-              send(pid,{:is_arg,true})
-              types_server(used,types,is_typed,module)
-          end
     {:module,pid} -> send(pid,{:module,module})
-              types_server(used,types,is_typed,module)
+              types_server(used,types,module)
     {:check_var, var, pid} ->
       if (!Enum.member?(used,var)) do
         type = Map.get(types,String.to_atom(var))
@@ -710,18 +698,16 @@ def types_server(used,types, is_typed,module) do
           raise "Could not find type for variable #{var}. Please declare it using \"var #{var} type\""
         end
         send(pid,{:type,type})
-        types_server([var|used],types,is_typed,module)
+        types_server([var|used],types,module)
       else
         send(pid,{:alredy_declared})
-        types_server(used,types,is_typed,module)
+        types_server(used,types,module)
       end
     {:check_return,pid} -> send(pid, Map.get(types,:return))
-                       types_server(used,types, is_typed,module)
+                       types_server(used,types, module)
     {:kill} ->
       :ok
     end
-
-  end
 end
 
 #############3 end types server
@@ -738,7 +724,7 @@ end
     ERL_NIF_TERM list;
     ERL_NIF_TERM head;
     ERL_NIF_TERM tail;
-    float **array_res;
+
     void **fun_res;
 
     const ERL_NIF_TERM *tuple_blocks;
@@ -803,6 +789,21 @@ end
     arg = gen_arg_matrix(n)
     args <> arg
   end
+  def gen_args(n,[:tint|t]) do
+    args = gen_args(n-1,t)
+    arg = gen_arg_tint(n)
+    args <> arg
+  end
+  def gen_args(n,[:tfloat|t]) do
+    args = gen_args(n-1,t)
+    arg = gen_arg_tfloat(n)
+    args <> arg
+  end
+  def gen_args(n,[:tdouble|t]) do
+    args = gen_args(n-1,t)
+    arg = gen_arg_tdouble(n)
+    args <> arg
+  end
   def gen_args(n,[:int|t]) do
     args = gen_args(n-1,t)
     arg = gen_arg_int(n)
@@ -827,6 +828,33 @@ end
     "  enif_get_list_cell(env,list,&head,&tail);
     enif_get_resource(env, head, type, (void **) &array_res);
     float *arg#{narg} = *array_res;
+    list = tail;
+
+  "
+  end
+  def gen_arg_tint(narg) do
+    "  int **array_res#{narg};
+    enif_get_list_cell(env,list,&head,&tail);
+    enif_get_resource(env, head, type, (void **) &array_res#{narg});
+    int *arg#{narg} = *array_res#{narg};
+    list = tail;
+
+  "
+  end
+  def gen_arg_tfloat(narg) do
+    "  float **array_res#{narg};
+    enif_get_list_cell(env,list,&head,&tail);
+    enif_get_resource(env, head, type, (void **) &array_res#{narg});
+    float *arg#{narg} = *array_res#{narg};
+    list = tail;
+
+  "
+  end
+  def gen_arg_tdouble(narg) do
+    "  double **array_res#{narg};
+    enif_get_list_cell(env,list,&head,&tail);
+    enif_get_resource(env, head, type, (void **) &array_res#{narg});
+    double *arg#{narg} = *array_res#{narg};
     list = tail;
 
   "
@@ -868,7 +896,7 @@ end
   def gen_arg_double(narg) do
 "  enif_get_list_cell(env,list,&head,&tail);
   double arg#{narg};
-  enif_get_double(env, head, &darg#{narg});
+  enif_get_double(env, head, &arg#{narg});
   list = tail;
 
 "

@@ -206,9 +206,14 @@ defmodule Hok do
 #######  GMatrex stuff:
 #######
 ####################
-
-def create_nx_ref_nif(_matrex,_l,_c) do
-  raise "NIF create_nx_ref_nif/3 not implemented"
+def new_gpu_nx_nif(_l,_c,_type) do
+  raise "NIF get_nx_nif/4 not implemented"
+end
+def get_nx_nif(_matrex,_l,_c,_type) do
+  raise "NIF get_nx_nif/4 not implemented"
+end
+def create_nx_ref_nif(_matrex,_l,_c,_type) do
+  raise "NIF create_nx_ref_nif/4 not implemented"
 end
   def create_ref_nif(_matrex) do
     raise "NIF create_ref_nif/1 not implemented"
@@ -230,7 +235,12 @@ end
 def new_gmatrex((%Nx.Tensor{data: data, type: type, shape: shape, names: name}) ) do
   %Nx.BinaryBackend{ state: array} = data
   {l,c} = shape
-  ref=create_nx_ref_nif(array,l,c)
+  ref = case type do
+     {:f,32} -> create_nx_ref_nif(array,l,c,Kernel.to_charlist("float"))
+     {:f,64} -> create_nx_ref_nif(array,l,c,Kernel.to_charlist("double"))
+     {:s,32} -> create_nx_ref_nif(array,l,c,Kernel.to_charlist("int"))
+     x -> raise "new_gmatrex: type #{x} not suported"
+  end
   {:nx, type, shape, name , ref}
 end
 def new_gmatrex({array,{l,c}}) do
