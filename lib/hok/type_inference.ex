@@ -324,6 +324,8 @@ end
 defp infer_types_args(map,[],type), do: {map,type}
 defp infer_types_args(map,[h|tail],type) do
    t=find_type_exp(map,h)
+   IO.inspect h
+   IO.inspect t
    case t do
       :none -> infer_types_args(map,tail, type ++ [:none])
       nt     -> map = set_type_exp(map,nt,h)
@@ -503,16 +505,12 @@ defp set_type_exp(map,type,exp) do
            end
         end
       {fun, _, args} when is_list(args)->
-         #IO.inspect args
-         #raise "hell"
          type_fun = Map.get(map,fun)
          if( type_fun == nil) do
             Enum.reduce(args,map, fn v,acc -> infer_type_exp(acc,v) end)
           else
             case type_fun do
               :none ->      {map, infered_type}= infer_types_args(map,args,[])
-                          #  IO.inspect {map, infered_type}
-                           # IO.inspect type
                             map = Map.put(map,fun, {type,infered_type})
                             map
               {ret,type_args} -> {map, infered_type} = set_type_args(map,type_args,args,[])
@@ -569,13 +567,12 @@ end
 
   defp find_type_exp(map,exp) do
       case exp do
-         {{:., _, [Access, :get]}, _, [arg1,_arg2]} ->
-
+         {{:., _, [Access, :get]}, _, [{arg1,_,_},_arg2]} ->
            case map[arg1] do
              :tint -> :int
              :tdouble -> :double
              :tfloat -> :float
-             nil -> :none
+             nil ->  :none
            end
 
         {{:., _, [{_struct, _, nil}, _field]},_,[]} ->

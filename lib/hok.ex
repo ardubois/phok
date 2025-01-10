@@ -201,6 +201,33 @@ defmodule Hok do
 #  "#{v}," <> to_arg_list(t)
 #end
 
+######################################
+#########
+########   GNX stuff
+#######
+##############################
+
+def get_type_gnx({:nx, type, _shape, _name , _ref}) do
+  type
+end
+def get_shape_gnx({:nx, _type, shape, _name , _ref}) do
+  shape
+end
+def new_gnx(size,type) do
+  {:nx, type, :shape, :name, :ref}
+end
+def new_gnx ((%Nx.Tensor{data: data, type: type, shape: shape, names: name}) ) do
+ # %Nx.BinaryBackend{ state: array} = data
+  #{l,c} = shape
+  #ref = case type do
+   #  {:f,32} -> create_nx_ref_nif(array,l,c,Kernel.to_charlist("float"))
+   #  {:f,64} -> create_nx_ref_nif(array,l,c,Kernel.to_charlist("double"))
+   #  {:s,32} -> create_nx_ref_nif(array,l,c,Kernel.to_charlist("int"))
+   #  x -> raise "new_gmatrex: type #{x} not suported"
+  #end
+  {:nx, type, shape, name , :ref}
+end
+
 ################################
 #######
 #######  GMatrex stuff:
@@ -287,6 +314,18 @@ def load_fun_nif(_module,_fun) do
 end
 
 ############################################################## Loading types and asts from files
+def load_ast(kernel) do
+  {module,f_name}= case Macro.escape(kernel) do
+    {:&, [],[{:/, [], [{{:., [], [module, f_name]}, [no_parens: true], []}, _nargs]}]} -> {module,f_name}
+     _ -> raise "Argument to spawn should be a function."
+  end
+  IO.inspect f_name
+  bytes = File.read!("c_src/#{module}.asts")
+  map_asts = :erlang.binary_to_term(bytes)
+
+  {ast,_typed?,_types} = Map.get(map_asts,String.to_atom("#{f_name}"))
+  ast
+end
 
 def load_type_ast(kernel) do
   {:&, _ ,[{:/, _,  [{{:., _, [{:__aliases__, _, [module]}, kernelname]}, _, []}, _nargs]}]} = kernel
@@ -507,7 +546,14 @@ end
 ######## at compilation we build a representation for the kernel: {:ker, its type, its ast}
 ##### and leave a call to spawn
 
-defmacro spawn_jit(k,t,b,l) do
+def spawn_jit(k,t,b,l) do
+  ast  = load_ast(k)
+  #IO.inspect ast
+  IO.inspect l
+  delta = JIT.gen_types_delta(ast,l)
+  inf_types = JIT.infer_types(ast,delta)
+  IO.inspect inf_types
+  raise "hell"
   case k do
     {:&, _,_} ->
             #IO.inspect t
@@ -524,33 +570,7 @@ defmacro spawn_jit(k,t,b,l) do
   end
 end
 
-############ at run time we call this function
 
-def spawn({:ker, k, type,ast}, t, b, l) do
- # Subs.remove_args(ast)
- # raise "hella"
-  f_name= case Macro.escape(k) do
-    {:&, [],[{:/, [], [{{:., [], [_module, f_name]}, [no_parens: true], []}, _nargs]}]} -> f_name
-     _ -> raise "Argument to spawn should be a function."
-  end
-
-  ####### First type check the arguments
-    {:unit,tk} = type
-    type_check_args(f_name,1,tk,l)
-
-
-  ##########
-
-  k = JIT.compile_and_load_kernel({:ker, k, type,ast},  l)
-
-
-  args = process_args_no_fun(l)
-
-  IO.inspect args
-
-  spawn_nif(k,t,b,args)
-
-end
 
 #############################################3
 ##########

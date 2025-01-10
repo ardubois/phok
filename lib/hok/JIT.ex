@@ -1,5 +1,40 @@
 defmodule JIT do
 
+def infer_types({:defk,_,[header,[body]]},delta) do
+  Hok.TypeInference.type_check(delta,body)
+end
+  # finds the types of the actual parameters and generates a maping of formal parameters to their types
+def gen_types_delta({:defk,_,[header,[body]]}, actual_param) do
+  {_, _, formal_para} = header
+  types = infer_types_actual_parameters(actual_param)
+  formal_para
+          |> Enum.map(fn({p, _, _}) -> p end)
+          |> Enum.zip(types)
+          |> Map.new()
+end
+
+
+def infer_types_actual_parameters([])do
+  []
+end
+def infer_types_actual_parameters([h|t])do
+  case h do
+    {:nx, type, shape, name , :ref} ->
+        case type do
+          {:f,32} -> [:tfloat | infer_types_actual_parameters(t)]
+          {:f,64} -> [:tdouble | infer_types_actual_parameters(t)]
+          {:s,32} -> [:tint | infer_types_actual_parameters(t)]
+        end
+    float when  is_float(float) ->
+        [:float | infer_types_actual_parameters(t)]
+    int   when  is_integer(int) ->
+        [:int | infer_types_actual_parameters(t)]
+    func when is_function(func) ->
+        [:none | infer_types_actual_parameters(t)]
+  end
+end
+#########################3 OLD
+
 def compile_and_load_kernel({:ker, _k, k_type,{ast, is_typed?, delta}},  l) do
 
  # get the formal parameters of the function
