@@ -216,7 +216,7 @@ defmodule Hok.TypeInference do
                       |> Map.put(var,type_exp)
                       |> set_type_exp(type_exp,exp)
                     else
-                      infer_type_fun(map,exp) #  hak to infer the types of arguments in case is a function call
+                      infer_type_fun(map,exp) #  map
                     end
               {map,var_type} ->
 
@@ -273,9 +273,7 @@ defmodule Hok.TypeInference do
              type_fun = map[fun]
             # IO.inspect type_fun
               if( type_fun == nil) do
-                 # Enum.reduce(args,map, fn v,acc -> infer_type_exp(acc,v) end)
-                 {map, infered_type}= infer_types_args(map,args,[])
-                  Map.put(map,fun, {:unit,infered_type})
+                  Enum.reduce(args,map, fn v,acc -> infer_type_exp(acc,v) end)
               else
                   case type_fun do
                     :none ->      {map, infered_type}= infer_types_args(map,args,[])
@@ -326,8 +324,6 @@ end
 defp infer_types_args(map,[],type), do: {map,type}
 defp infer_types_args(map,[h|tail],type) do
    t=find_type_exp(map,h)
-   IO.inspect h
-   IO.inspect t
    case t do
       :none -> infer_types_args(map,tail, type ++ [:none])
       nt     -> map = set_type_exp(map,nt,h)
@@ -372,20 +368,13 @@ end
 defp set_type_exp(map,type,exp) do
     case exp do
       {{:., info, [Access, :get]}, _, [arg1,arg2]} ->
-       case type do
-         :int -> map
-             |> Map.put(get_var(arg1),:tint)
-             |> set_type_exp(:int,arg2)
-         :float -> map
-             |> Map.put(get_var(arg1),:tfloat)
-             |> set_type_exp(:int,arg2)
-         :double -> map
-             |> Map.put(get_var(arg1),:tdouble)
-             |> set_type_exp(:int,arg2)
-         _ -> raise "Error: location (#{inspect info}), unknown type #{inspect type}"
-
+       if(type != :float) do
+         raise "Matrex  (#{inspect(arg1)}) (#{inspect(info)}) is being used in a context of type #{inspect type}"
+       else
+        map
+        |> Map.put(get_var(arg1),:matrex)
+        |> set_type_exp(:int,arg2)
        end
-
       {{:., _, [{_struct, _, nil}, _field]},_,[]} ->
         map
       {{:., _, [{:__aliases__, _, [_struct]}, _field]}, _, []} ->
@@ -507,15 +496,16 @@ defp set_type_exp(map,type,exp) do
            end
         end
       {fun, _, args} when is_list(args)->
+         #IO.inspect args
+         #raise "hell"
          type_fun = Map.get(map,fun)
          if( type_fun == nil) do
-            #Enum.reduce(args,map, fn v,acc -> infer_type_exp(acc,v) end)
-            {map, infered_type}= infer_types_args(map,args,[])
-             map = Map.put(map,fun, {type,infered_type})
-             map
+            Enum.reduce(args,map, fn v,acc -> infer_type_exp(acc,v) end)
           else
             case type_fun do
               :none ->      {map, infered_type}= infer_types_args(map,args,[])
+                          #  IO.inspect {map, infered_type}
+                           # IO.inspect type
                             map = Map.put(map,fun, {type,infered_type})
                             map
               {ret,type_args} -> {map, infered_type} = set_type_args(map,type_args,args,[])
@@ -572,14 +562,8 @@ end
 
   defp find_type_exp(map,exp) do
       case exp do
-         {{:., _, [Access, :get]}, _, [{arg1,_,_},_arg2]} ->
-           case map[arg1] do
-             :tint -> :int
-             :tdouble -> :double
-             :tfloat -> :float
-             nil ->  :none
-           end
-
+         {{:., _, [Access, :get]}, _, [_arg1,_arg2]} ->
+           :float
         {{:., _, [{_struct, _, nil}, _field]},_,[]} ->
            :int
         {{:., _, [{:__aliases__, _, [_struct]}, _field]}, _, []} ->
@@ -596,12 +580,10 @@ end
                 :int  -> case t2 do
                            :int -> :int
                            :float -> :float
-                           :double -> :double
                            :none -> :none
                            _  -> raise "Incompatible operands (#{inspect info}: op (#{inspect op}) applyed to  type #{inspect t2}"
                           end
                 :float -> :float
-                :double -> :double
                 _ -> raise "Incompatible operands (#{inspect info}: op (#{inspect op}) applyed to  type #{inspect t1}"
 
               end

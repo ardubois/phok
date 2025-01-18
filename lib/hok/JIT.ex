@@ -1,10 +1,89 @@
 defmodule JIT do
 
-def infer_types({:defk,_,[header,[body]]},delta) do
+def compile_function({name,type}) do
+  fast = Hok.load_ast(name)
+  delta = gen_delta_from_type(fast,type)
+  inf_types = JIT.infer_types(fast,delta)
+  {:defh,_iinfo,[header,[body]]} = fast
+  {fname, _, para} = header
+
+  param_list = para
+      |> Enum.map(fn {p, _, _}-> Hok.CudaBackend.gen_para(p,Map.get(inf_types,p)) end)
+      |> Enum.join(", ")
+
+  param_vars = para
+      |>  Enum.map(fn {p, _, _}-> p end)
+
+
+  fun_type =  Map.get(inf_types,:return)
+
+  cuda_body = Hok.CudaBackend.gen_cuda(body,inf_types,param_vars,"module")
+  k =        Hok.CudaBackend.gen_function(fname,param_list,cuda_body,fun_type)
+  "\n" <> k <> "\n\n"
+end
+
+def compile_kernel({:defk,_,[header,[body]]},inf_types,subs) do
+
+  {fname, _, para} = header
+
+  param_list = para
+      |> Enum.map(fn {p, _, _}-> Hok.CudaBackend.gen_para(p,Map.get(inf_types,p)) end)
+      |> Enum.filter(fn p -> p != nil end)
+      |> Enum.join(", ")
+
+
+  param_vars = para
+   |>  Enum.map(fn {p, _, _}-> p end)
+
+  types_para = para
+   |>  Enum.map(fn {p, _, _}-> Map.get(inf_types,p) end)
+
+   cuda_body = Hok.CudaBackend.gen_cuda_jit(body,inf_types,param_vars,"module",subs)
+   k = Hok.CudaBackend.gen_kernel(fname,param_list,cuda_body)
+   accessfunc = Hok.CudaBackend.gen_kernel_call(fname,length(para),Enum.reverse(types_para))
+   "\n" <> k <> "\n\n" <> accessfunc
+end
+
+def gen_delta_from_type( {:defh,_,[header,[_body]]}, {return_type, types} ) do
+   {_, _, formal_para} = header
+   delta=formal_para
+          |> Enum.map(fn({p, _, _}) -> p end)
+          |> Enum.zip(types)
+          |> Map.new()
+   Map.put(delta, :return, return_type)
+end
+def get_function_parameters_and_their_types({:defk,_,[header,[_body]]}, actual_para, delta) do
+  {_, _, formal_para} = header
+  formal_para
+          |> Enum.map(fn({p, _, _}) -> p end)
+          |> Enum.zip(actual_para)
+          |> Enum.filter(fn {_n,p} -> is_function(p) end)
+          |> Enum.map(fn {n,p} -> {n,p,delta[n]} end)
+end
+def get_function_parameters({:defk,_,[header,[_body]]}, actual_para) do
+  {_, _, formal_para} = header
+  formal_para
+          |> Enum.map(fn({p, _, _}) -> p end)
+          |> Enum.zip(actual_para)
+          |> Enum.filter(fn {_n,p} -> is_function(p) end)
+          |> Enum.reduce( Map.new(), fn {n,p}, map -> Map.put(map,n,get_function_name(p)) end)
+         # |> Enum.map(fn {n,p} -> {n,p} end)
+end
+def get_function_name(fun) do
+  {module,f_name}= case Macro.escape(fun) do
+    {:&, [],[{:/, [], [{{:., [], [module, f_name]}, [no_parens: true], []}, _nargs]}]} -> {module,f_name}
+     _ -> raise "Argument to spawn should be a function: #{inspect Macro.escape(fun)}"
+  end
+  f_name
+end
+def infer_types({:defk,_,[_header,[body]]},delta) do
+  Hok.TypeInference.type_check(delta,body)
+end
+def infer_types({:defh,_,[_header,[body]]},delta) do
   Hok.TypeInference.type_check(delta,body)
 end
   # finds the types of the actual parameters and generates a maping of formal parameters to their types
-def gen_types_delta({:defk,_,[header,[body]]}, actual_param) do
+def gen_types_delta({:defk,_,[header,[_body]]}, actual_param) do
   {_, _, formal_para} = header
   types = infer_types_actual_parameters(actual_param)
   formal_para
@@ -19,7 +98,7 @@ def infer_types_actual_parameters([])do
 end
 def infer_types_actual_parameters([h|t])do
   case h do
-    {:nx, type, shape, name , :ref} ->
+    {:nx, type, _shape, _name , :ref} ->
         case type do
           {:f,32} -> [:tfloat | infer_types_actual_parameters(t)]
           {:f,64} -> [:tdouble | infer_types_actual_parameters(t)]
@@ -33,6 +112,215 @@ def infer_types_actual_parameters([h|t])do
         [:none | infer_types_actual_parameters(t)]
   end
 end
+
+#####
+### Processes a module and populates the ast server with information about functions (their ast, and call graph)
+#################
+
+def process_module(module_name,body) do
+
+  # initiate server that collects types and asts
+  pid = spawn_link(fn -> module_server(%{},%{}) end)
+  Process.register(pid, :module_server)
+
+  code = case body do
+      {:__block__, [], definitions} ->  process_definitions(module_name,definitions)
+      _   -> process_definitions(module_name,[body])
+  end
+end
+
+###########################
+######  This server constructs two maps: 1. function names ->  types
+#                                        2. function names -> ASTs
+######            Types are used to type check at runtime a kernel call
+######            ASTs are used to recompile a kernel at runtime substituting the names of the formal parameters of a function for
+######         the actual parameters
+############################
+def module_server(types_map,ast_map) do
+   receive do
+    {:add_ast,fun, ast} ->
+      module_server(types_map,Map.put(ast_map,fun,ast))
+    {:get_ast,f_name,pid} ->  send(pid, {:ast, ast_map[f_name]})
+                              module_server(types_map,ast_map)
+     {:add_type,fun, type} ->
+      module_server(Map.put(types_map,fun,type),ast_map)
+     {:get_map,pid} ->  send(pid, {:map,{types_map,ast_map}})
+      module_server(types_map,ast_map)
+     {:kill} ->
+           :ok
+     end
+end
+
+
+
+#############################################
+##### Compiling the definitions in a Hok module
+#####################
+defp process_definitions(_module_name, []), do: ""
+defp process_definitions(module_name,[h|t]) do
+       case h do
+        {:defk,_,[header,[body]]} ->  {fname, _, para} = header
+                                      register_function(module_name,fname,h)
+                                      process_definitions(module_name,t)
+
+        {:defh , _, [header,[body]]} -> {fname, _, para} = header
+                                        register_function(module_name,fname,h)
+                                        process_definitions(module_name,t)
+        {:include, _, [{_,_,[name]}]} -> raise "include: yet to be implemented."
+        _               -> process_definitions(module_name,t)
+
+
+      end
+
+end
+
+def register_function(module_name,fun_name,ast) do
+  send(:module_server,{:add_ast,fun_name,ast})
+end
+
+###################
+#### finds the names of functions called inside a device function or kernel
+########################
+def find_functions({:defk, _i1,[header, [body]]}) do
+  {_fname, _, para} = header
+
+  param_vars = para
+  |>  Enum.map(fn {p, _, _}-> p end)
+  |>  MapSet.new()
+
+  {_args,funs} = find_function_calls_body({param_vars,MapSet.new()},body)
+
+  MapSet.to_list(funs)
+end
+
+
+def find_functions({:defh, _i1,[header, [body]]}) do
+  {_fname, _, para} = header
+
+  param_vars = para
+  |>  Enum.map(fn {p, _, _}-> p end)
+  |>  MapSet.new()
+
+  {_args,funs} = find_function_calls_body({param_vars,MapSet.new()},body)
+
+  MapSet.to_list(funs)
+end
+
+def find_function_calls_body(map,body) do
+
+  case body do
+     {:__block__, _, _code} ->
+      find_function_calls_block(map,body)
+     {:do, {:__block__,pos, code}} ->
+      find_function_calls_block(map, {:__block__, pos,code})
+     {:do, exp} ->
+      find_function_calls_command(map,exp)
+     {_,_,_} ->
+      find_function_calls_command(map,body)
+  end
+end
+
+
+defp find_function_calls_block(map,{:__block__, _info, code}) do
+  Enum.reduce(code,map, fn x,acc -> find_function_calls_command(acc,x) end)
+end
+
+defp find_function_calls_command(map,code) do
+  case code do
+      {:for,_i,[_param,[body]]} ->
+       find_function_calls_body(map,body)
+      {:do_while, _i, [[doblock]]} ->
+       find_function_calls_body(map,doblock)
+      {:do_while_test, _i, [exp]} ->
+       find_function_calls_exp(map,exp)
+      {:while, _i, [bexp,[body]]} ->
+       map = find_function_calls_exp(map,bexp)
+       find_function_calls_body(map,body)
+      # CRIAÇÃO DE NOVOS VETORES
+      {{:., _i1, [Access, :get]}, _i2, [arg1,arg2]} ->
+        map=find_function_calls_exp(map,arg1)
+        find_function_calls_exp(map,arg2)
+      {:__shared__, _i1, [{{:., _i2, [Access, :get]}, _i3, [arg1,arg2]}]} ->
+        map=find_function_calls_exp(map,arg1)
+        find_function_calls_exp(map,arg2)
+
+      # assignment
+      {:=, _i1, [{{:., _i2, [Access, :get]}, _i3, [{_array,_a1,_a2},acc_exp]}, exp]} ->
+        map= find_function_calls_exp(map,acc_exp)
+        find_function_calls_exp(map,exp)
+      {:=, _i, [_var, exp]} ->
+       find_function_calls_exp(map,exp)
+      {:if, _i, if_com} ->
+       find_function_calls_if(map,if_com)
+      {:var, _i1 , [{_var,_i2,[{:=, _i3, [{_type,_ii,nil}, exp]}]}]} ->
+       find_function_calls_exp(map,exp)
+      {:var, _i1 , [{_var,_i2,[{:=, _i3, [_type, exp]}]}]} ->
+       find_function_calls_exp(map,exp)
+      {:var, _i1 , [{_var,_i2,[{_type,_i3,_t}]}]} ->
+        map
+      {:var, _i1 , [{_var,_i2,[_type]}]} ->
+        map
+      {:type, _i1 , [{_var,_i2,[{_type,_i3,_t}]}]} ->
+        map
+      {:type, _i1 , [{_var,_i2,[_type]}]} ->
+        map
+
+      {:return,_i,[arg]} ->
+       find_function_calls_exp(map,arg)
+
+      {fun, _info, args} when is_list(args)->
+        {args,funs} = map
+        if MapSet.member?(args,fun) do
+          map
+        else
+           {args,MapSet.put(funs,fun)}
+        end
+      number when is_integer(number) or is_float(number) -> raise "Error: number is a command"
+      {str,i1 ,a } -> {str,i1 ,a }
+
+  end
+end
+
+defp find_function_calls_if(map,[bexp, [do: then]]) do
+  map=find_function_calls_exp(map,bexp)
+  find_function_calls_body(map,then)
+ end
+ defp find_function_calls_if(map,[bexp, [do: thenbranch, else: elsebranch]]) do
+  map=find_function_calls_exp(map,bexp)
+  map=find_function_calls_body(map,thenbranch)
+  find_function_calls_body(map,elsebranch)
+ end
+
+
+ defp find_function_calls_exp(map,exp) do
+  case exp do
+    {{:., _i1, [Access, :get]}, _i2, [_arg1,arg2]} ->
+     find_function_calls_exp(map,arg2)
+    {{:., _i1, [{_struct, _i2, nil}, _field]},_i3,[]} ->
+        map
+    {{:., _i1, [{:__aliases__, _i2, [_struct]}, _field]}, _i3, []} ->
+       map
+    {op,info, args} when op in [:+, :-, :/, :*] ->
+      Enum.reduce(args,map, fn x,acc -> find_function_calls_exp(acc,x) end)
+
+    {op, info, args} when op in [ :<=, :<, :>, :>=, :&&, :||, :!,:!=,:==] ->
+      Enum.reduce(args,map, fn x,acc -> find_function_calls_exp(acc,x) end)
+    {var,info, nil} when is_atom(var) ->
+       map
+    {fun,info, args} ->
+     {args,funs} = map
+     if MapSet.member?(args,fun) do
+       map
+     else
+        {args,MapSet.put(funs,fun)}
+     end
+    float when  is_float(float) -> map
+    int   when  is_integer(int) -> map
+    string when is_binary(string)  -> map
+  end
+
+end
+
 #########################3 OLD
 
 def compile_and_load_kernel({:ker, _k, k_type,{ast, is_typed?, delta}},  l) do

@@ -76,6 +76,22 @@ defmodule Hok do
     #quote do: IO.puts "ok"
   end
 
+  defmacro defmodule_jit(header,do: body) do
+    #IO.inspect header
+    #IO.inspect body
+    {:__aliases__, _, [module_name]} = header
+
+
+    code = JIT.process_module(module_name,body)
+
+    ast_new_module = Hok.CudaBackend.gen_new_module(header,body)
+    #IO.inspect ast_new_module
+    ast_new_module
+
+
+    #quote do: IO.puts "ok"
+  end
+
   defmacro include(inc_list) do
     #IO.inspect inc_list
     includes = inc_list
@@ -319,12 +335,23 @@ def load_ast(kernel) do
     {:&, [],[{:/, [], [{{:., [], [module, f_name]}, [no_parens: true], []}, _nargs]}]} -> {module,f_name}
      _ -> raise "Argument to spawn should be a function."
   end
-  IO.inspect f_name
-  bytes = File.read!("c_src/#{module}.asts")
-  map_asts = :erlang.binary_to_term(bytes)
 
-  {ast,_typed?,_types} = Map.get(map_asts,String.to_atom("#{f_name}"))
-  ast
+ # bytes = File.read!("c_src/#{module}.asts")
+ # map_asts = :erlang.binary_to_term(bytes)
+ # IO.inspect map_size(map_asts)
+ # {ast,_typed?,_types} = Map.get(map_asts,String.to_atom("#{f_name}"))
+ # ast
+
+ send(:module_server,{:get_ast,f_name,self()})
+
+ receive do
+   {:ast,ast} -> if ast == nil do
+                    raise "Could not find ast for #{f_name}."
+                 else
+                  ast
+                 end
+    h     -> raise "unknown message for function type server #{inspect h}"
+ end
 end
 
 def load_type_ast(kernel) do
@@ -547,12 +574,21 @@ end
 ##### and leave a call to spawn
 
 def spawn_jit(k,t,b,l) do
-  ast  = load_ast(k)
+  kast  = load_ast(k)
   #IO.inspect ast
   IO.inspect l
-  delta = JIT.gen_types_delta(ast,l)
-  inf_types = JIT.infer_types(ast,delta)
-  IO.inspect inf_types
+  delta = JIT.gen_types_delta(kast,l)
+  inf_types = JIT.infer_types(kast,delta)
+  subs = JIT.get_function_parameters(kast,l)
+  IO.inspect JIT.compile_kernel(kast,inf_types,subs)
+  #comp = Enum.map(functions,&JIT.compile_function/1)
+  #IO.inspect comp
+  #IO.inspect JIT.compile_kernel(kast,inf_types)
+  #IO.inspect JIT.find_functions(kast)
+  #IO.inspect inf_types
+  #fast = load_ast(func)
+  #IO.inspect fast
+  #IO.inspect type
   raise "hell"
   case k do
     {:&, _,_} ->

@@ -175,8 +175,6 @@ end
        |>  Enum.map(fn {p, _, _}-> Map.get(inf_types,p) end)
 
 
-    param_vars = para
-    |>  Enum.map(fn {p, _, _}-> p end)
 
     #inf_types = if is_typed do %{} else inf_types end
     #IO.inspect inf_types
@@ -191,6 +189,9 @@ end
 
     #IO.inspect inf_types
     #raise "hell"
+
+    param_vars = para
+    |>  Enum.map(fn {p, _, _}-> p end)
 
     cuda_body = Hok.CudaBackend.gen_cuda(body,inf_types,param_vars,module)
     k = Hok.CudaBackend.gen_kernel(fname,param_list,cuda_body)
@@ -276,8 +277,10 @@ end
 
 
     #save_type_info(fname, Map.get(inf_types, :return),types_para)
+    param_vars = para
+    |>  Enum.map(fn {p, _, _}-> p end)
 
-    cuda_body = Hok.CudaBackend.gen_cuda(body,inf_types,is_typed,module)
+    cuda_body = Hok.CudaBackend.gen_cuda(body,inf_types,param_vars,module)
     k =        Hok.CudaBackend.gen_function(fname,param_list,cuda_body,fun_type)
     ptr =      Hok.CudaBackend.gen_function_ptr(fname)
     get_ptr = Hok.CudaBackend.gen_get_function_ptr(fname)
@@ -289,7 +292,7 @@ end
 
   #################### Compile a function
 
-  def compile_function(_module_name,{:defh,_,[header,[body]]}, type_def,module) do
+  def compile_function(_module_name,{:defh,iinfo,[header,[body]]}, type_def,module) do
     {fname, _, para} = header
    # IO.inspect body
     #raise "hell"
@@ -314,6 +317,8 @@ end
 
     fun_type = if is_typed do fun_type else Map.get(inf_types,:return) end
 
+    save_ast_info(fname,{:defh,iinfo,[header,[body]]},is_typed, inf_types)
+
     param_list = para
       |> Enum.map(fn {p, _, _}-> gen_para(p,Map.get(inf_types,p)) end)
       |> Enum.join(", ")
@@ -321,11 +326,15 @@ end
     types_para = para
       |>  Enum.map(fn {p, _, _}-> Map.get(inf_types,p) end)
 
+    param_vars = para
+      |>  Enum.map(fn {p, _, _}-> p end)
+
+
 ##################3
     #fname = "#{module_name}_#{fname}"
     save_type_info(fname, Map.get(inf_types, :return),types_para)
 
-    cuda_body = Hok.CudaBackend.gen_cuda(body,inf_types,is_typed,module)
+    cuda_body = Hok.CudaBackend.gen_cuda(body,inf_types,param_vars,module)
     k =        Hok.CudaBackend.gen_function(fname,param_list,cuda_body,fun_type)
     ptr =      Hok.CudaBackend.gen_function_ptr(fname)
     get_ptr = Hok.CudaBackend.gen_get_function_ptr(fname)
@@ -372,15 +381,10 @@ def gen_para(p,:double) do
   "double #{p}"
 end
 def gen_para(p, {ret,type}) do
-  #size = length(list)
 
-  #{ret,type}=List.pop_at(list,size-1)
-  #IO.inspect list
-  #IO.inspect ret
-  #IO.inspect type
-  #raise "hell"
-  r="#{ret} (*#{p})(#{to_arg_list(type)})"
-  r
+  #r="#{ret} (*#{p})(#{to_arg_list(type)})"
+  #r
+  nil
 
 end
 defp to_arg_list([:matrex]) do
@@ -483,20 +487,29 @@ defp is_exp?(exp) do
 end
 
 #############################
-
-
-def gen_cuda(body,types,param_vars,module) do
+def check_fun(fun) do
+  send(:types_server,{:check_fun, fun, self()})
+  resp = receive do
+             {:fun_info, nn} -> nn
+             h    -> raise "Unknown message from type server #{inspect h}"
+  end
+end
+def gen_cuda_jit(body,types,param_vars,module,subs) do
   # IO.puts "##########################gen cuda"
   # IO.inspect types
  #  IO.puts "############end gen cuda"
    # raise "hell"
-    pid = spawn_link(fn -> types_server(param_vars,types,module) end)
+   IO.puts "gen_cuda"
+   IO.inspect param_vars
+    pid = spawn_link(fn -> types_server(param_vars,types,module,subs) end)
     Process.register(pid, :types_server)
     code = gen_body(body)
     send(pid,{:kill})
     Process.unregister(:types_server)
     code
-  end
+end
+
+
   def gen_body(body) do
     #IO.inspect body
     body = add_return(body)
@@ -597,8 +610,12 @@ def gen_cuda(body,types,param_vars,module) do
           |> Enum.map(&gen_exp/1)
           |> Enum.join(", ")
 
-          "#{fun}(#{nargs});"
-
+          nfun = check_fun(fun)
+          if nfun == nil do
+            "#{fun}(#{nargs});"
+          else
+            "#{nfun}(#{nargs});"
+          end
           #if(is_arg(fun)) do
            #   "#{fun}(#{nargs})\;"
           #else
@@ -634,7 +651,13 @@ def gen_cuda(body,types,param_vars,module) do
           |> Enum.map(&gen_exp/1)
           |> Enum.join(", ")
 
-          "#{fun}(#{nargs})"
+          nfun = check_fun(fun)
+          if nfun == nil do
+            "#{fun}(#{nargs});"
+          else
+            "#{nfun}(#{nargs});"
+          end
+
 
       #    if(is_arg(fun)) do
       #      "#{fun}(#{nargs});"
@@ -685,10 +708,10 @@ end
 #  end
 #end
 
-def types_server(used, types, module) do
+def types_server(used, types, module,subs) do
    receive do
     {:module,pid} -> send(pid,{:module,module})
-              types_server(used,types,module)
+              types_server(used,types,module,subs)
     {:check_var, var, pid} ->
       if (!Enum.member?(used,var)) do
         type = Map.get(types,String.to_atom(var))
@@ -698,13 +721,15 @@ def types_server(used, types, module) do
           raise "Could not find type for variable #{var}. Please declare it using \"var #{var} type\""
         end
         send(pid,{:type,type})
-        types_server([var|used],types,module)
+        types_server([var|used],types,module,subs)
       else
         send(pid,{:alredy_declared})
-        types_server(used,types,module)
+        types_server(used,types,module,subs)
       end
     {:check_return,pid} -> send(pid, Map.get(types,:return))
-                       types_server(used,types, module)
+                       types_server(used,types, module,subs)
+    {:check_fun,name,pid} -> send(pid, {:fun_info, Map.get(subs,name)})
+                             types_server(used,types, module,subs)
     {:kill} ->
       :ok
     end
