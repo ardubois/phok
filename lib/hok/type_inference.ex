@@ -1,6 +1,8 @@
 defmodule Hok.TypeInference do
   def type_check(map,body) do
 
+    #body = Hok.CudaBackend.add_return(body)
+
     types = infer_types(map,body)
     notinfer = not_infered(Map.to_list(types))
     if(length(notinfer)>0) do
@@ -38,9 +40,9 @@ defmodule Hok.TypeInference do
    map = para
    |> Enum.map(fn({p, _, _}) -> p end)
    |> Map.new(fn x -> {x,:none} end)
-   IO.inspect body
+  # IO.inspect body
    nmap = infer_types(map,body)
-   IO.inspect nmap
+   #IO.inspect nmap
    :ok
   end
 
@@ -110,10 +112,10 @@ defmodule Hok.TypeInference do
   end
 #######################################################33
 
-  def infer_types(map,body1) do
+  def infer_types(map,body) do
     #IO.puts "#####"
     #IO.inspect body1
-    body = add_return(map,body1)
+    #body = add_return(map,body1)
 
     #IO.inspect body
     #IO.puts "####"
@@ -247,21 +249,18 @@ defmodule Hok.TypeInference do
                   |> Map.put(var,type)
 
           {:return,_,[arg]} ->
-            inf_type = find_type_exp(map,arg)
-            #IO.inspect "return #{type}"
-            case inf_type do
-              :none -> map
-              _     -> current_type = Map.get(map,:return)
-                       case current_type do
-                            :none -> map = set_type_exp(map,inf_type,arg)
-                                     Map.put(map,:return,inf_type)
-                            _     -> if inf_type == current_type do
-                                            map = set_type_exp(map,inf_type,arg)
-                                            map
-                                     else
-                                          raise "Found two return types for function #{current_type} and #{inf_type}"
-                                     end
-                       end
+            case map[:return] do
+              :none ->
+                  inf_type = find_type_exp(map,arg)
+                  #IO.inspect "return #{type}"
+                  case inf_type do
+                      :none -> map
+                       found_type ->  map = set_type_exp(map,inf_type,arg)
+                                      map
+                  end
+                nil -> raise "Function must have a return."
+                found_type -> set_type_exp(map,found_type,arg)
+
             end
 
           {fun, _, args} when is_list(args)->
@@ -326,8 +325,8 @@ end
 defp infer_types_args(map,[],type), do: {map,type}
 defp infer_types_args(map,[h|tail],type) do
    t=find_type_exp(map,h)
-   IO.inspect h
-   IO.inspect t
+   #IO.inspect h
+   #IO.inspect t
    case t do
       :none -> infer_types_args(map,tail, type ++ [:none])
       nt     -> map = set_type_exp(map,nt,h)
@@ -406,7 +405,7 @@ defp set_type_exp(map,type,exp) do
                       set_type_exp(map,:int,a2)
           tt  -> raise "Exp #{inspect a1} (#{inspect info}) has type #{tt} and should have type #{type}"
         end
-      {op, info, args} when op in [:+, :-, :/, :*] ->
+      {op, _info, args} when op in [:+, :-, :/, :*] ->
           case args do
            [a1] ->
          #   if(type != :int && type != :float) do
@@ -488,7 +487,7 @@ defp set_type_exp(map,type,exp) do
                 |> set_type_exp(:int,a2)
 
           end
-      {var, info, nil} when is_atom(var) ->
+      {var, _info, nil} when is_atom(var) ->
         if (Map.get(map,var)==nil) do
           raise "Error: variable #{inspect var} is used in expression before being declared"
         end

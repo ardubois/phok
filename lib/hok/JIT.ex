@@ -1,9 +1,15 @@
+require Hok.CudaBackend
+
 defmodule JIT do
 
 def compile_function({name,type}) do
-  fast = Hok.load_ast(name)
+  #IO.puts "Compile function: #{name}"
+  {fast,fun_graph} = Hok.load_ast(name)
   delta = gen_delta_from_type(fast,type)
+  #IO.inspect "Delta: #{inspect delta}"
+  #IO.inspect "Call graph: #{inspect fun_graph}"
   inf_types = JIT.infer_types(fast,delta)
+  #IO.inspect "inf_types: #{inspect inf_types}"
   {:defh,_iinfo,[header,[body]]} = fast
   {fname, _, para} = header
 
@@ -17,9 +23,20 @@ def compile_function({name,type}) do
 
   fun_type =  Map.get(inf_types,:return)
 
-  cuda_body = Hok.CudaBackend.gen_cuda(body,inf_types,param_vars,"module")
+  cuda_body = Hok.CudaBackend.gen_cuda_jit(body,inf_types,param_vars,"module",MapSet.new())
   k =        Hok.CudaBackend.gen_function(fname,param_list,cuda_body,fun_type)
-  "\n" <> k <> "\n\n"
+
+  function = "\n" <> k <> "\n\n"
+
+  other_funs = fun_graph
+                |> Enum.map(fn x -> {x, inf_types[x]} end)
+                |> Enum.filter(fn {_,i} -> i != nil end)
+  #IO.inspect funs
+  #IO.inspect other_funs
+  IO.inspect "other funs: #{inspect other_funs}"
+  comp = Enum.map(other_funs,&JIT.compile_function/1)
+  comp = Enum.reduce(comp,[], fn x, y -> x++y end)
+  [function]++comp
 end
 
 def compile_kernel({:defk,_,[header,[body]]},inf_types,subs) do
@@ -58,7 +75,7 @@ def get_function_parameters_and_their_types({:defk,_,[header,[_body]]}, actual_p
           |> Enum.map(fn({p, _, _}) -> p end)
           |> Enum.zip(actual_para)
           |> Enum.filter(fn {_n,p} -> is_function(p) end)
-          |> Enum.map(fn {n,p} -> {n,p,delta[n]} end)
+          |> Enum.map(fn {n,p} -> {get_function_name(p),delta[n]} end)
 end
 def get_function_parameters({:defk,_,[header,[_body]]}, actual_para) do
   {_, _, formal_para} = header
@@ -138,8 +155,8 @@ end
 ############################
 def module_server(types_map,ast_map) do
    receive do
-    {:add_ast,fun, ast} ->
-      module_server(types_map,Map.put(ast_map,fun,ast))
+    {:add_ast,fun, ast,funs} ->
+      module_server(types_map,Map.put(ast_map,fun,{ast,funs}))
     {:get_ast,f_name,pid} ->  send(pid, {:ast, ast_map[f_name]})
                               module_server(types_map,ast_map)
      {:add_type,fun, type} ->
@@ -154,17 +171,26 @@ end
 
 
 #############################################
-##### Compiling the definitions in a Hok module
+##### For every function and kernel definition, it registers an ast and and the functions called inside the definition
 #####################
-defp process_definitions(_module_name, []), do: ""
+defp process_definitions(_module_name, []), do: :ok
 defp process_definitions(module_name,[h|t]) do
        case h do
         {:defk,_,[header,[body]]} ->  {fname, _, para} = header
-                                      register_function(module_name,fname,h)
+                                      funs = find_functions(h)
+                                      register_function(module_name,fname,h,funs)
                                       process_definitions(module_name,t)
 
-        {:defh , _, [header,[body]]} -> {fname, _, para} = header
-                                        register_function(module_name,fname,h)
+        {:defh , ii, [header,[body]]} -> {fname, _, para} = header
+
+                                      #  IO.inspect "Process definitions: #{fname}"
+
+
+                                        body = Hok.CudaBackend.add_return(body)
+                                        funs = find_functions({:defh , ii, [header,[body]]})
+                                       # IO.inspect "Function graph: #{inspect funs}"
+                                       # IO.inspect "body: #{inspect body}"
+                                        register_function(module_name,fname,{:defh , ii, [header,[body]]},funs)
                                         process_definitions(module_name,t)
         {:include, _, [{_,_,[name]}]} -> raise "include: yet to be implemented."
         _               -> process_definitions(module_name,t)
@@ -174,8 +200,8 @@ defp process_definitions(module_name,[h|t]) do
 
 end
 
-def register_function(module_name,fun_name,ast) do
-  send(:module_server,{:add_ast,fun_name,ast})
+def register_function(module_name,fun_name,ast,funs) do
+  send(:module_server,{:add_ast,fun_name,ast,funs})
 end
 
 ###################
@@ -195,12 +221,14 @@ end
 
 
 def find_functions({:defh, _i1,[header, [body]]}) do
+ # IO.inspect "aqui inicio"
   {_fname, _, para} = header
 
   param_vars = para
   |>  Enum.map(fn {p, _, _}-> p end)
   |>  MapSet.new()
 
+  #IO.inspect "body #{inspect body}"
   {_args,funs} = find_function_calls_body({param_vars,MapSet.new()},body)
 
   MapSet.to_list(funs)
@@ -214,6 +242,7 @@ def find_function_calls_body(map,body) do
      {:do, {:__block__,pos, code}} ->
       find_function_calls_block(map, {:__block__, pos,code})
      {:do, exp} ->
+     # IO.inspect "here #{inspect exp}"
       find_function_calls_command(map,exp)
      {_,_,_} ->
       find_function_calls_command(map,body)
@@ -226,6 +255,7 @@ defp find_function_calls_block(map,{:__block__, _info, code}) do
 end
 
 defp find_function_calls_command(map,code) do
+  #IO.inspect "here2"
   case code do
       {:for,_i,[_param,[body]]} ->
        find_function_calls_body(map,body)
@@ -266,9 +296,11 @@ defp find_function_calls_command(map,code) do
         map
 
       {:return,_i,[arg]} ->
+   #     IO.inspect "Aqui3"
        find_function_calls_exp(map,arg)
 
       {fun, _info, args} when is_list(args)->
+    #    IO.inspect "Aqui3 #{length args} #{inspect fun}"
         {args,funs} = map
         if MapSet.member?(args,fun) do
           map
@@ -301,6 +333,7 @@ defp find_function_calls_if(map,[bexp, [do: then]]) do
     {{:., _i1, [{:__aliases__, _i2, [_struct]}, _field]}, _i3, []} ->
        map
     {op,info, args} when op in [:+, :-, :/, :*] ->
+     # IO.inspect "Aqui"
       Enum.reduce(args,map, fn x,acc -> find_function_calls_exp(acc,x) end)
 
     {op, info, args} when op in [ :<=, :<, :>, :>=, :&&, :||, :!,:!=,:==] ->
@@ -308,6 +341,7 @@ defp find_function_calls_if(map,[bexp, [do: then]]) do
     {var,info, nil} when is_atom(var) ->
        map
     {fun,info, args} ->
+      #IO.inspect "Aqui2"
      {args,funs} = map
      if MapSet.member?(args,fun) do
        map

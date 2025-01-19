@@ -420,14 +420,14 @@ end
 
 ########################## ADDING RETURN statement to the ast WHEN FUNCTION RETURNS AN EXPRESSION
 
-defp add_return(body) do
-  send(:types_server,{:check_return, self()})
-  resp = receive do
-             msg  -> msg
-  end
-  if resp == nil do
-    body
-  else
+def add_return(body) do
+  #send(:types_server,{:check_return, self()})
+  #resp = receive do
+   #          msg  -> msg
+  #end
+  #if resp == nil do
+  #  body
+  #else
     case body do
       {:__block__, pos, code} ->
               {:__block__, pos, check_return(code)}
@@ -449,7 +449,7 @@ defp add_return(body) do
                   end
 
     end
-  end
+  #end
 end
 defp check_return([com]) do
   case com do
@@ -461,6 +461,7 @@ defp check_return([com]) do
                 else
                   [com]
                 end
+        h -> raise "unknown #{inspect h}"
   end
 end
 defp check_return([h|t]) do
@@ -476,7 +477,7 @@ defp is_exp?(exp) do
     {:!, _info, [_arg]} -> true
     {op, _inf, _args} when op in [ :&&, :||] -> true
     {var, _info, nil} when is_atom(var) -> true
-    #{fun, _, args} when is_list(args)-> true
+    {fun, _, args} when is_list(args)-> true
     #{_fun, _, _noargs} ->
     float when  is_float(float) -> true
     int   when  is_integer(int) -> true
@@ -499,8 +500,8 @@ def gen_cuda_jit(body,types,param_vars,module,subs) do
   # IO.inspect types
  #  IO.puts "############end gen cuda"
    # raise "hell"
-   IO.puts "gen_cuda"
-   IO.inspect param_vars
+  # IO.puts "gen_cuda"
+  # IO.inspect param_vars
     pid = spawn_link(fn -> types_server(param_vars,types,module,subs) end)
     Process.register(pid, :types_server)
     code = gen_body(body)
@@ -512,7 +513,7 @@ end
 
   def gen_body(body) do
     #IO.inspect body
-    body = add_return(body)
+    #body = add_return(body)
     #IO.inspect(body)
     #raise "hell"
     case body do

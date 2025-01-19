@@ -1,16 +1,19 @@
 require Hok
 Hok.defmodule_jit PMap do
-  defh g(a) do
+  defh cc(a) do
     a+a
   end
+  defh g(a) do
+    cc(a+a)
+  end
   defh inc(a)do
-    v = g(a+a)
-    return 1+a
+    #v = g(a+a)
+    1+a
   end
   deft map_ske tfloat ~> tfloat ~> integer ~> [float ~> float] ~> unit
   defk map_ske(a1,a2,size,f) do
     var id int = blockIdx.x * blockDim.x + threadIdx.x
-    #var r float = g(a1[id])
+    var r int = g(a1[id])
     if(id < size) do
       a2[id] = f(a1[id])
     end

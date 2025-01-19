@@ -82,7 +82,7 @@ defmodule Hok do
     {:__aliases__, _, [module_name]} = header
 
 
-    code = JIT.process_module(module_name,body)
+    JIT.process_module(module_name,body)
 
     ast_new_module = Hok.CudaBackend.gen_new_module(header,body)
     #IO.inspect ast_new_module
@@ -229,10 +229,10 @@ end
 def get_shape_gnx({:nx, _type, shape, _name , _ref}) do
   shape
 end
-def new_gnx(size,type) do
+def new_gnx(_size,type) do
   {:nx, type, :shape, :name, :ref}
 end
-def new_gnx ((%Nx.Tensor{data: data, type: type, shape: shape, names: name}) ) do
+def new_gnx ((%Nx.Tensor{data: _data, type: type, shape: shape, names: name}) ) do
  # %Nx.BinaryBackend{ state: array} = data
   #{l,c} = shape
   #ref = case type do
@@ -331,9 +331,10 @@ end
 
 ############################################################## Loading types and asts from files
 def load_ast(kernel) do
-  {module,f_name}= case Macro.escape(kernel) do
+  {_module,f_name}= case Macro.escape(kernel) do
     {:&, [],[{:/, [], [{{:., [], [module, f_name]}, [no_parens: true], []}, _nargs]}]} -> {module,f_name}
-     _ -> raise "Argument to spawn should be a function."
+    f -> {:ok,f}
+     #_ -> raise "Argument to spawn should be a function."
   end
 
  # bytes = File.read!("c_src/#{module}.asts")
@@ -574,15 +575,21 @@ end
 ##### and leave a call to spawn
 
 def spawn_jit(k,t,b,l) do
-  kast  = load_ast(k)
+  {kast,fun_graph}  = load_ast(k)
   #IO.inspect ast
-  IO.inspect l
+  #IO.inspect l
   delta = JIT.gen_types_delta(kast,l)
   inf_types = JIT.infer_types(kast,delta)
   subs = JIT.get_function_parameters(kast,l)
-  IO.inspect JIT.compile_kernel(kast,inf_types,subs)
-  #comp = Enum.map(functions,&JIT.compile_function/1)
-  #IO.inspect comp
+  JIT.compile_kernel(kast,inf_types,subs)
+  funs=JIT.get_function_parameters_and_their_types(kast,l,inf_types)
+  other_funs = fun_graph
+                |> Enum.map(fn x -> {x, inf_types[x]} end)
+                |> Enum.filter(fn {_,i} -> i != nil end)
+  IO.inspect funs
+  IO.inspect other_funs
+  comp = Enum.map(funs++other_funs,&JIT.compile_function/1)
+  IO.inspect comp
   #IO.inspect JIT.compile_kernel(kast,inf_types)
   #IO.inspect JIT.find_functions(kast)
   #IO.inspect inf_types
