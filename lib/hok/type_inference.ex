@@ -555,11 +555,32 @@ defp set_type_exp(map,type,exp) do
   #end
   defp infer_type_fun(map,exp) do
       case exp do
-        {_fun, _, args} when is_list(args)->
-          Enum.reduce(args,map, fn v,acc -> infer_type_exp(acc,v) end)
+        {fun, _, args} when is_list(args)->
+          type_fun = Map.get(map,fun)
+          if( type_fun == nil) do
+             #Enum.reduce(args,map, fn v,acc -> infer_type_exp(acc,v) end)
+             {map, infered_type}= infer_types_args(map,args,[])
+              map = Map.put(map,fun, {:none,infered_type})
+              map
+           else
+             case type_fun do
+               :none ->      {map, infered_type}= infer_types_args(map,args,[])
+                             map = Map.put(map,fun, {:none,infered_type})
+                             map
+               {ret,type_args} -> {map, infered_type} = set_type_args(map,type_args,args,[])
+                                  Map.put(map,fun, {ret, infered_type})
+
+             end
+          end
+
+
+
+
         _ -> map
        end
   end
+
+
   defp infer_type_exp(map,exp) do
     type = find_type_exp(map,exp)
     if (type != :none) do

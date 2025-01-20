@@ -3,11 +3,11 @@ require Hok.CudaBackend
 defmodule JIT do
 
 def compile_function({name,type}) do
-  #IO.puts "Compile function: #{name}"
+  IO.puts "Compile function: #{name}"
   {fast,fun_graph} = Hok.load_ast(name)
   delta = gen_delta_from_type(fast,type)
   #IO.inspect "Delta: #{inspect delta}"
-  #IO.inspect "Call graph: #{inspect fun_graph}"
+  IO.inspect "Call graph: #{inspect fun_graph}"
   inf_types = JIT.infer_types(fast,delta)
   #IO.inspect "inf_types: #{inspect inf_types}"
   {:defh,_iinfo,[header,[body]]} = fast
@@ -32,7 +32,7 @@ def compile_function({name,type}) do
                 |> Enum.map(fn x -> {x, inf_types[x]} end)
                 |> Enum.filter(fn {_,i} -> i != nil end)
   #IO.inspect funs
-  #IO.inspect other_funs
+  IO.inspect "inf_types: #{inspect inf_types}"
   IO.inspect "other funs: #{inspect other_funs}"
   comp = Enum.map(other_funs,&JIT.compile_function/1)
   comp = Enum.reduce(comp,[], fn x, y -> x++y end)
@@ -74,7 +74,7 @@ def get_function_parameters_and_their_types({:defk,_,[header,[_body]]}, actual_p
   formal_para
           |> Enum.map(fn({p, _, _}) -> p end)
           |> Enum.zip(actual_para)
-          |> Enum.filter(fn {_n,p} -> is_function(p) end)
+          |> Enum.filter(fn {_n,p} -> is_function_para(p) end)
           |> Enum.map(fn {n,p} -> {get_function_name(p),delta[n]} end)
 end
 def get_function_parameters({:defk,_,[header,[_body]]}, actual_para) do
@@ -82,9 +82,19 @@ def get_function_parameters({:defk,_,[header,[_body]]}, actual_para) do
   formal_para
           |> Enum.map(fn({p, _, _}) -> p end)
           |> Enum.zip(actual_para)
-          |> Enum.filter(fn {_n,p} -> is_function(p) end)
+          |> Enum.filter(fn {_n,p} -> is_function_para(p) end)
           |> Enum.reduce( Map.new(), fn {n,p}, map -> Map.put(map,n,get_function_name(p)) end)
          # |> Enum.map(fn {n,p} -> {n,p} end)
+end
+def is_function_para(func) do
+  case func do
+    {:anon, _name, _code} -> true
+    func when is_function(func) -> true
+    _h -> false
+  end
+end
+def get_function_name({:anon, name, _code}) do
+  name
 end
 def get_function_name(fun) do
   {module,f_name}= case Macro.escape(fun) do
@@ -121,6 +131,7 @@ def infer_types_actual_parameters([h|t])do
           {:f,64} -> [:tdouble | infer_types_actual_parameters(t)]
           {:s,32} -> [:tint | infer_types_actual_parameters(t)]
         end
+    {:anon,_name,_code} ->     [:none | infer_types_actual_parameters(t)]
     float when  is_float(float) ->
         [:float | infer_types_actual_parameters(t)]
     int   when  is_integer(int) ->

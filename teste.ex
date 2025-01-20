@@ -35,8 +35,16 @@ Hok.defmodule_jit PMap do
 
 end
 
+a = Hok.hok (fn x,y -> x+y end)
+IO.inspect a
+#raise "hell"
+
 tensor = Nx.tensor([1,2,3,4],type: {:s, 32})
 
 gtensor = Hok.new_gnx(tensor)
 
-PMap.map(gtensor,&PMap.inc/1)
+func = Hok.hok (fn x -> x +1 end)
+
+#PMap.map(gtensor,&PMap.inc/1)
+
+PMap.map(gtensor,func)

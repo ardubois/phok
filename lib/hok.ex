@@ -5,16 +5,21 @@ defmodule Hok do
       #IO.puts("ok")
   end
 
-  defmacro hok(function) do
-    #resp =  Macro.escape(quote(do: {:anon , unquote(function)}))
-     #resp
+  defmacro hok({:fn, aa, [{:->, bb , [para,body]}] }) do
+    body =  Hok.CudaBackend.add_return(body)
+    name = Hok.CudaBackend.gen_lambda_name()
+    function = {:fn, aa, [{:->, bb , [para,body]}] }
+    resp =  quote(do: {:anon , unquote(name),unquote(Macro.escape function)})
+  #  resp =  quote(do: {:anon , unquote(name),unquote({:fn, aa, [{:->, bb , [para,body]}] })})
+     resp
     #IO.inspect function
     #raise "hell"
-    {fname,type} = Hok.CudaBackend.gen_lambda("Elixir.App",function)
-    result = quote do: Hok.load_lambda_compilation(unquote("Elixir.App"), unquote(fname), unquote(type))
+    #{fname,type} = Hok.CudaBackend.gen_lambda("Elixir.App",function)
+    #result = quote do: Hok.load_lambda_compilation(unquote("Elixir.App"), unquote(fname), unquote(type))
+    #result
     #IO.inspect result
     #raise "hell"
-    result
+
   end
 
   defmacro gpufor({:<-, _ ,[var,tensor]},do: b)  do
