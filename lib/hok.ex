@@ -582,7 +582,7 @@ end
 def spawn_jit(k,t,b,l) do
   {kast,fun_graph}  = load_ast(k)
   #IO.inspect ast
-  #IO.inspect l
+  IO.inspect l
   delta = JIT.gen_types_delta(kast,l)
   inf_types = JIT.infer_types(kast,delta)
   subs = JIT.get_function_parameters(kast,l)
