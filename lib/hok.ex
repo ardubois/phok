@@ -6,6 +6,7 @@ defmodule Hok do
   end
 
   defmacro hok({:fn, aa, [{:->, bb , [para,body]}] }) do
+   # IO.inspect "body: #{inspect body}"
     body =  Hok.CudaBackend.add_return(body)
     name = Hok.CudaBackend.gen_lambda_name()
     function = {:fn, aa, [{:->, bb , [para,body]}] }

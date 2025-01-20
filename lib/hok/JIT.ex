@@ -2,6 +2,34 @@ require Hok.CudaBackend
 
 defmodule JIT do
 
+  def compile_function({:anon,fname,code,type}) do
+    IO.puts "Compile function: #{fname}"
+
+    delta = gen_delta_from_type(code,type)
+    #IO.inspect "Delta: #{inspect delta}"
+
+    inf_types = JIT.infer_types(code,delta)
+    #IO.inspect "inf_types: #{inspect inf_types}"
+    {:fn, _, [{:->, _ , [para,body]}] } = code
+
+
+    param_list = para
+        |> Enum.map(fn {p, _, _}-> Hok.CudaBackend.gen_para(p,Map.get(inf_types,p)) end)
+        |> Enum.join(", ")
+
+    param_vars = para
+        |>  Enum.map(fn {p, _, _}-> p end)
+
+
+    fun_type =  Map.get(inf_types,:return)
+
+    cuda_body = Hok.CudaBackend.gen_cuda_jit(body,inf_types,param_vars,"module",MapSet.new())
+    k =        Hok.CudaBackend.gen_function(fname,param_list,cuda_body,fun_type)
+
+    function = "\n" <> k <> "\n\n"
+
+    [function]
+end
 def compile_function({name,type}) do
   IO.puts "Compile function: #{name}"
   {fast,fun_graph} = Hok.load_ast(name)
@@ -69,13 +97,25 @@ def gen_delta_from_type( {:defh,_,[header,[_body]]}, {return_type, types} ) do
           |> Map.new()
    Map.put(delta, :return, return_type)
 end
+def gen_delta_from_type( {:fn, _, [{:->, _ , [para,body]}] }, {return_type, types} ) do
+
+  delta=para
+         |> Enum.map(fn({p, _, _}) -> p end)
+         |> Enum.zip(types)
+         |> Map.new()
+  Map.put(delta, :return, return_type)
+end
 def get_function_parameters_and_their_types({:defk,_,[header,[_body]]}, actual_para, delta) do
   {_, _, formal_para} = header
   formal_para
           |> Enum.map(fn({p, _, _}) -> p end)
           |> Enum.zip(actual_para)
           |> Enum.filter(fn {_n,p} -> is_function_para(p) end)
-          |> Enum.map(fn {n,p} -> {get_function_name(p),delta[n]} end)
+          |> Enum.map(fn {n,p} -> case p do
+                                      {:anon, name, code} -> {:anon, name, code, delta[n]}
+                                      _ -> {get_function_name(p),delta[n]}
+                                  end
+                                  end)
 end
 def get_function_parameters({:defk,_,[header,[_body]]}, actual_para) do
   {_, _, formal_para} = header
@@ -85,6 +125,12 @@ def get_function_parameters({:defk,_,[header,[_body]]}, actual_para) do
           |> Enum.filter(fn {_n,p} -> is_function_para(p) end)
           |> Enum.reduce( Map.new(), fn {n,p}, map -> Map.put(map,n,get_function_name(p)) end)
          # |> Enum.map(fn {n,p} -> {n,p} end)
+end
+def is_anon(func) do
+  case func do
+    {:anon,_name,_code} -> true
+    _ -> false
+  end
 end
 def is_function_para(func) do
   case func do
@@ -107,6 +153,11 @@ def infer_types({:defk,_,[_header,[body]]},delta) do
   Hok.TypeInference.type_check(delta,body)
 end
 def infer_types({:defh,_,[_header,[body]]},delta) do
+  Hok.TypeInference.type_check(delta,body)
+end
+def infer_types({:fn, _, [{:->, _ , [_para,body]}] },delta) do
+  IO.inspect delta
+  IO.inspect body
   Hok.TypeInference.type_check(delta,body)
 end
   # finds the types of the actual parameters and generates a maping of formal parameters to their types
