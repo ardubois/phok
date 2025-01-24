@@ -171,12 +171,12 @@ defmodule Hok.TypeInference do
           {{:., _, [Access, :get]}, _, [arg1,arg2]} ->
              array = get_var arg1
              map
-             |> Map.put(array,:matrex)
+             |> Map.put(array,:none)
              |> set_type_exp(:int,arg2)
           {:__shared__,_ , [{{:., _, [Access, :get]}, _, [arg1,arg2]}]} ->
              array = get_var arg1
              map
-             |> Map.put(array,:matrex)
+             |> Map.put(array,:none)
              |> set_type_exp(:int,arg2)
           # assignment
           {:=, _, [{{:., _, [Access, :get]}, _, [{array,_,_},acc_exp]}, exp]} ->

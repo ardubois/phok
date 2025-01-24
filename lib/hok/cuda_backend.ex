@@ -601,7 +601,20 @@ end
         {:__shared__,_ , [{{:., _, [Access, :get]}, _, [arg1,arg2]}]} ->
           name = gen_exp arg1
           index = gen_exp arg2
-          "__shared__ float #{name}[#{index}];"
+          send(:types_server,{:check_var, name, self()})
+          atype=receive do
+                {:type,type}->
+                   case type do
+                    :tint -> :int
+                    :tfloat -> :float
+                    :tdouble -> :double
+                    u -> raise "Type #{u} given to array #{name}"
+                   end
+                _ ->
+                   raise "Var #{name} already declared."
+              end
+
+          "__shared__ #{atype} #{name}[#{index}];"
         {:var, _ , [{var,_,[{:=, _, [{type,_,nil}, exp]}]}]} ->
           #IO.puts "aqui"
           gexp = gen_exp exp

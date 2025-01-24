@@ -201,6 +201,18 @@ def infer_types_actual_parameters([h|t])do
   end
 end
 
+def get_includes() do
+  send(:module_server,{:get_include,self()})
+
+ inc=receive do
+   {:include,inc} -> inc
+    h     -> raise "unknown message for function type server #{inspect h}"
+ end
+ case inc do
+  nil -> ""
+  list -> Enum.reduce(list,"", fn x, y -> y<>x end)
+ end
+end
 #####
 ### Processes a module and populates the ast server with information about functions (their ast, and call graph)
 #################
@@ -233,7 +245,14 @@ def module_server(types_map,ast_map) do
      {:add_type,fun, type} ->
       module_server(Map.put(types_map,fun,type),ast_map)
      {:get_map,pid} ->  send(pid, {:map,{types_map,ast_map}})
-      module_server(types_map,ast_map)
+                        module_server(types_map,ast_map)
+     {:get_include,pid} -> send(pid, {:include, ast_map[:include]})
+                            module_server(types_map,ast_map)
+     {:add_include, inc} -> case ast_map[:include] do
+                             nil -> module_server(types_map,Map.put(ast_map,:include,[inc]))
+                             l -> module_server(types_map,Map.put(ast_map,:include,[inc|l]))
+                            end
+
      {:kill} ->
            :ok
      end
@@ -263,7 +282,11 @@ defp process_definitions(module_name,[h|t]) do
                                        # IO.inspect "body: #{inspect body}"
                                         register_function(module_name,fname,{:defh , ii, [header,[body]]},funs)
                                         process_definitions(module_name,t)
-        {:include, _, [{_,_,[name]}]} -> raise "include: yet to be implemented."
+        {:include, _, [{_,_,[name]}]} ->
+                code = File.read!("c_src/Elixir.#{name}.cu")
+                #IO.inspect code
+                send(:module_server,{:add_include,code})
+                process_definitions(module_name,t)
         _               -> process_definitions(module_name,t)
 
 
