@@ -32,40 +32,44 @@ defmodule JIT do
 end
 def compile_function({name,type}) do
   IO.puts "Compile function: #{name}"
-  {fast,fun_graph} = Hok.load_ast(name)
-  delta = gen_delta_from_type(fast,type)
-  #IO.inspect "Delta: #{inspect delta}"
-  IO.inspect "Call graph: #{inspect fun_graph}"
-  inf_types = JIT.infer_types(fast,delta)
-  #IO.inspect "inf_types: #{inspect inf_types}"
-  {:defh,_iinfo,[header,[body]]} = fast
-  {fname, _, para} = header
+  nast = Hok.load_ast(name)
+  case nast do
+    nil -> [""]
+    {fast,fun_graph} ->
+          delta = gen_delta_from_type(fast,type)
+          #IO.inspect "Delta: #{inspect delta}"
+          #IO.inspect "Call graph: #{inspect fun_graph}"
+          inf_types = JIT.infer_types(fast,delta)
+          #IO.inspect "inf_types: #{inspect inf_types}"
+          {:defh,_iinfo,[header,[body]]} = fast
+          {fname, _, para} = header
 
-  param_list = para
-      |> Enum.map(fn {p, _, _}-> Hok.CudaBackend.gen_para(p,Map.get(inf_types,p)) end)
-      |> Enum.join(", ")
+          param_list = para
+              |> Enum.map(fn {p, _, _}-> Hok.CudaBackend.gen_para(p,Map.get(inf_types,p)) end)
+              |> Enum.join(", ")
 
-  param_vars = para
-      |>  Enum.map(fn {p, _, _}-> p end)
+          param_vars = para
+              |>  Enum.map(fn {p, _, _}-> p end)
 
 
-  fun_type =  Map.get(inf_types,:return)
+          fun_type =  Map.get(inf_types,:return)
 
-  cuda_body = Hok.CudaBackend.gen_cuda_jit(body,inf_types,param_vars,"module",MapSet.new())
-  k =        Hok.CudaBackend.gen_function(fname,param_list,cuda_body,fun_type)
+          cuda_body = Hok.CudaBackend.gen_cuda_jit(body,inf_types,param_vars,"module",MapSet.new())
+          k =        Hok.CudaBackend.gen_function(fname,param_list,cuda_body,fun_type)
 
-  function = "\n" <> k <> "\n\n"
+          function = "\n" <> k <> "\n\n"
 
-  other_funs = fun_graph
+          other_funs = fun_graph
                 |> Enum.map(fn x -> {x, inf_types[x]} end)
                 |> Enum.filter(fn {_,i} -> i != nil end)
-  #IO.inspect funs
-  IO.inspect "inf_types: #{inspect inf_types}"
-  IO.inspect "other funs: #{inspect other_funs}"
-  comp = Enum.map(other_funs,&JIT.compile_function/1)
-  IO.inspect "Comp: #{inspect comp} "
-  comp = Enum.reduce(comp,[], fn x, y -> y++x end)
-  comp ++ [function]
+          #IO.inspect funs
+          #IO.inspect "inf_types: #{inspect inf_types}"
+          #IO.inspect "other funs: #{inspect other_funs}"
+          comp = Enum.map(other_funs,&JIT.compile_function/1)
+          #IO.inspect "Comp: #{inspect comp} "
+          comp = Enum.reduce(comp,[], fn x, y -> y++x end)
+          comp ++ [function]
+    end
 end
 
 def compile_kernel({:defk,_,[header,[body]]},inf_types,subs) do

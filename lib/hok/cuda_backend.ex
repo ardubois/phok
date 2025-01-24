@@ -510,6 +510,20 @@ def gen_cuda_jit(body,types,param_vars,module,subs) do
     code
 end
 
+def gen_cuda(body,types,param_vars,module) do
+  # IO.puts "##########################gen cuda"
+  # IO.inspect types
+ #  IO.puts "############end gen cuda"
+   # raise "hell"
+  # IO.puts "gen_cuda"
+  # IO.inspect param_vars
+    pid = spawn_link(fn -> types_server(param_vars,types,module,Map.new()) end)
+    Process.register(pid, :types_server)
+    code = gen_body(body)
+    send(pid,{:kill})
+    Process.unregister(:types_server)
+    code
+end
 
   def gen_body(body) do
     #IO.inspect body
