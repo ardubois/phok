@@ -213,6 +213,28 @@ def get_includes() do
   list -> Enum.reduce(list,"", fn x, y -> y<>x end)
  end
 end
+def load_kernel(kernel) do
+  case Macro.escape(kernel) do
+    {:&, [],[{:/, [], [{{:., [], [_module, kernelname]}, [no_parens: true], []}, _nargs]}]} ->
+
+
+             # IO.puts module
+              #raise "hell"
+              #module_name=String.slice("#{module}",7..-1//1) # Eliminates Elixir.
+              Hok.load_kernel_nif(to_charlist("Elixir.#{kernelname}"),to_charlist("#{kernelname}"))
+
+    _ -> raise "Hok.build: invalid kernel"
+  end
+end
+def get_kernel_name(kernel) do
+  case Macro.escape(kernel) do
+    {:&, [],[{:/, [], [{{:., [], [_module, kernelname]}, [no_parens: true], []}, _nargs]}]} -> kernelname
+
+
+
+    _ -> raise "Hok.build: invalid kernel"
+  end
+end
 #####
 ### Processes a module and populates the ast server with information about functions (their ast, and call graph)
 #################
