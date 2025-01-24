@@ -63,8 +63,9 @@ def compile_function({name,type}) do
   IO.inspect "inf_types: #{inspect inf_types}"
   IO.inspect "other funs: #{inspect other_funs}"
   comp = Enum.map(other_funs,&JIT.compile_function/1)
-  comp = Enum.reduce(comp,[], fn x, y -> x++y end)
-  [function]++comp
+  IO.inspect "Comp: #{inspect comp} "
+  comp = Enum.reduce(comp,[], fn x, y -> y++x end)
+  comp ++ [function]
 end
 
 def compile_kernel({:defk,_,[header,[body]]},inf_types,subs) do
@@ -82,10 +83,14 @@ def compile_kernel({:defk,_,[header,[body]]},inf_types,subs) do
 
   types_para = para
    |>  Enum.map(fn {p, _, _}-> Map.get(inf_types,p) end)
+   |> Enum.filter(fn p -> case p do
+                             {_,_} -> false
+                              _ -> true
+                    end end)
 
    cuda_body = Hok.CudaBackend.gen_cuda_jit(body,inf_types,param_vars,"module",subs)
    k = Hok.CudaBackend.gen_kernel(fname,param_list,cuda_body)
-   accessfunc = Hok.CudaBackend.gen_kernel_call(fname,length(para),Enum.reverse(types_para))
+   accessfunc = Hok.CudaBackend.gen_kernel_call(fname,length(types_para),Enum.reverse(types_para))
    "\n" <> k <> "\n\n" <> accessfunc
 end
 

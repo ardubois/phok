@@ -654,9 +654,9 @@ end
 
           nfun = check_fun(fun)
           if nfun == nil do
-            "#{fun}(#{nargs});"
+            "#{fun}(#{nargs})"
           else
-            "#{nfun}(#{nargs});"
+            "#{nfun}(#{nargs})"
           end
 
 
@@ -751,7 +751,7 @@ end
     ERL_NIF_TERM head;
     ERL_NIF_TERM tail;
 
-    void **fun_res;
+   // void **fun_res;
 
     const ERL_NIF_TERM *tuple_blocks;
     const ERL_NIF_TERM *tuple_threads;
@@ -805,11 +805,11 @@ end
   def gen_args(0,_l) do
     ""
   end
-  def gen_args(n,[]) do
-    args = gen_args(n-1,[])
-    arg = gen_arg_matrix(n)
-    args <> arg
-  end
+ # def gen_args(n,[]) do
+ #   args = gen_args(n-1,[])
+ #   arg = gen_arg_matrix(n)
+ #   args <> arg
+ # end
   def gen_args(n,[:matrex|t]) do
     args = gen_args(n-1,t)
     arg = gen_arg_matrix(n)
@@ -851,6 +851,7 @@ end
     args <> arg
   end
   def gen_arg_matrix(narg) do
+    raise "what"
     "  enif_get_list_cell(env,list,&head,&tail);
     enif_get_resource(env, head, type, (void **) &array_res);
     float *arg#{narg} = *array_res;
