@@ -259,7 +259,7 @@ defmodule Hok.TypeInference do
                                       map
                   end
                 nil -> raise "Function must have a return."
-                found_type -> IO.inspect arg
+                found_type -> #IO.inspect arg
                     set_type_exp(map,found_type,arg)
 
             end
