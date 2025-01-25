@@ -41,6 +41,8 @@ end
 
 tensor = Nx.tensor([1,2,3,4],type: {:s, 32})
 
+Hok.new_gnx(tensor)
+
 gtensor = Hok.new_gnx(tensor)
 
 func = Hok.hok fn (x) -> x + 1 end

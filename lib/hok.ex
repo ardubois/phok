@@ -235,10 +235,47 @@ end
 def get_shape_gnx({:nx, _type, shape, _name , _ref}) do
   shape
 end
-def new_gnx(_size,type) do
+def new_gnx((%Nx.Tensor{data: data, type: type, shape: shape, names: name}) ) do
+  %Nx.BinaryBackend{ state: array} = data
+ # IO.inspect name
+ # raise "hell"
+  {l,c} = shape
+  ref = case type do
+     {:f,32} -> create_nx_ref_nif(array,l,c,Kernel.to_charlist("float"))
+     {:f,64} -> create_nx_ref_nif(array,l,c,Kernel.to_charlist("double"))
+     {:s,32} -> create_nx_ref_nif(array,l,c,Kernel.to_charlist("int"))
+     x -> raise "new_gmatrex: type #{x} not suported"
+  end
+  {:nx, type, shape, name , ref}
+end
+def new_gnx(l,c,type) do
+
+  ref = case type do
+    {:f,32} -> new_gpu_nx_nif(l,c,Kernel.to_charlist("float"))
+    {:f,64} -> new_gpu_nx_nif(l,c,Kernel.to_charlist("double"))
+    {:s,32} -> new_gpu_nx_nif(l,c,Kernel.to_charlist("int"))
+    x -> raise "new_gmatrex: type #{x} not suported"
+ end
+
+ {:nx, type, {l,c}, [nil] , ref}
+end
+
+def get_gnx({:nx, type, shape, name , ref}) do
+  {rows,cols} = shape
+  ref = case type do
+    {:f,32} -> get_nx_nif(ref,l,c,Kernel.to_charlist("float"))
+    {:f,64} -> get_nx_nif(ref,l,c,Kernel.to_charlist("double"))
+    {:s,32} -> get_nx_nif(ref,l,c,Kernel.to_charlist("int"))
+    x -> raise "new_gmatrex: type #{x} not suported"
+ end
+
+  %Nx.Tensor{data: %Nx.BinaryBackend{ state: get_matrex_nif(ref,rows,cols)}, type: type, shape: shape, names: name}
+end
+
+def new_gnx_fake(_size,type) do
   {:nx, type, :shape, :name, :ref}
 end
-def new_gnx ((%Nx.Tensor{data: _data, type: type, shape: shape, names: name}) ) do
+def new_gnx_fake ((%Nx.Tensor{data: _data, type: type, shape: shape, names: name}) ) do
  # %Nx.BinaryBackend{ state: array} = data
   #{l,c} = shape
   #ref = case type do
@@ -250,11 +287,6 @@ def new_gnx ((%Nx.Tensor{data: _data, type: type, shape: shape, names: name}) ) 
   {:nx, type, shape, name , :ref}
 end
 
-################################
-#######
-#######  GMatrex stuff:
-#######
-####################
 def new_gpu_nx_nif(_l,_c,_type) do
   raise "NIF get_nx_nif/4 not implemented"
 end
@@ -267,6 +299,14 @@ end
   def create_ref_nif(_matrex) do
     raise "NIF create_ref_nif/1 not implemented"
 end
+
+
+################################
+#######
+#######  GMatrex stuff:
+#######
+####################
+
 def new_pinned_nif(_list,_length) do
   raise "NIF new_pinned_nif/1 not implemented"
 end
