@@ -380,7 +380,7 @@ end
 def gen_para(p,:double) do
   "double #{p}"
 end
-def gen_para(p, {ret,type}) do
+def gen_para(_p, {_ret,_type}) do
 
   #r="#{ret} (*#{p})(#{to_arg_list(type)})"
   #r
@@ -461,7 +461,7 @@ defp check_return([com]) do
                 else
                   [com]
                 end
-        h -> raise "unknown #{inspect h}"
+        #h -> raise "unknown #{inspect h}"
   end
 end
 defp check_return([h|t]) do
@@ -477,7 +477,7 @@ defp is_exp?(exp) do
     {:!, _info, [_arg]} -> true
     {op, _inf, _args} when op in [ :&&, :||] -> true
     {var, _info, nil} when is_atom(var) -> true
-    {fun, _, args} when is_list(args)-> true
+    {_fun, _, args} when is_list(args)-> true
     #{_fun, _, _noargs} ->
     float when  is_float(float) -> true
     int   when  is_integer(int) -> true
@@ -490,7 +490,7 @@ end
 #############################
 def check_fun(fun) do
   send(:types_server,{:check_fun, fun, self()})
-  resp = receive do
+  receive do
              {:fun_info, nn} -> nn
              h    -> raise "Unknown message from type server #{inspect h}"
   end

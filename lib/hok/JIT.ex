@@ -3,7 +3,7 @@ require Hok.CudaBackend
 defmodule JIT do
 
   def compile_function({:anon,fname,code,type}) do
-    IO.puts "Compile function: #{fname}"
+   # IO.puts "Compile function: #{fname}"
 
     delta = gen_delta_from_type(code,type)
     #IO.inspect "Delta: #{inspect delta}"
@@ -31,7 +31,7 @@ defmodule JIT do
     [function]
 end
 def compile_function({name,type}) do
-  IO.puts "Compile function: #{name}"
+  #IO.puts "Compile function: #{name}"
   nast = Hok.load_ast(name)
   case nast do
     nil -> [""]
@@ -106,7 +106,7 @@ def gen_delta_from_type( {:defh,_,[header,[_body]]}, {return_type, types} ) do
           |> Map.new()
    Map.put(delta, :return, return_type)
 end
-def gen_delta_from_type( {:fn, _, [{:->, _ , [para,body]}] }, {return_type, types} ) do
+def gen_delta_from_type( {:fn, _, [{:->, _ , [para,_body]}] }, {return_type, types} ) do
 
   delta=para
          |> Enum.map(fn({p, _, _}) -> p end)
@@ -152,7 +152,7 @@ def get_function_name({:anon, name, _code}) do
   name
 end
 def get_function_name(fun) do
-  {module,f_name}= case Macro.escape(fun) do
+  {_module,f_name}= case Macro.escape(fun) do
     {:&, [],[{:/, [], [{{:., [], [module, f_name]}, [no_parens: true], []}, _nargs]}]} -> {module,f_name}
      _ -> raise "Argument to spawn should be a function: #{inspect Macro.escape(fun)}"
   end
@@ -165,8 +165,8 @@ def infer_types({:defh,_,[_header,[body]]},delta) do
   Hok.TypeInference.type_check(delta,body)
 end
 def infer_types({:fn, _, [{:->, _ , [_para,body]}] },delta) do
-  IO.inspect delta
-  IO.inspect body
+  #IO.inspect delta
+  #IO.inspect body
   Hok.TypeInference.type_check(delta,body)
 end
   # finds the types of the actual parameters and generates a maping of formal parameters to their types
@@ -245,7 +245,7 @@ def process_module(module_name,body) do
   pid = spawn_link(fn -> module_server(%{},%{}) end)
   Process.register(pid, :module_server)
 
-  code = case body do
+  case body do
       {:__block__, [], definitions} ->  process_definitions(module_name,definitions)
       _   -> process_definitions(module_name,[body])
   end
@@ -288,12 +288,12 @@ end
 defp process_definitions(_module_name, []), do: :ok
 defp process_definitions(module_name,[h|t]) do
        case h do
-        {:defk,_,[header,[body]]} ->  {fname, _, para} = header
+        {:defk,_,[header,[_body]]} ->  {fname, _, _para} = header
                                       funs = find_functions(h)
                                       register_function(module_name,fname,h,funs)
                                       process_definitions(module_name,t)
 
-        {:defh , ii, [header,[body]]} -> {fname, _, para} = header
+        {:defh , ii, [header,[body]]} -> {fname, _, _para} = header
 
                                       #  IO.inspect "Process definitions: #{fname}"
 
@@ -316,7 +316,7 @@ defp process_definitions(module_name,[h|t]) do
 
 end
 
-def register_function(module_name,fun_name,ast,funs) do
+def register_function(_module_name,fun_name,ast,funs) do
   send(:module_server,{:add_ast,fun_name,ast,funs})
 end
 
@@ -448,15 +448,15 @@ defp find_function_calls_if(map,[bexp, [do: then]]) do
         map
     {{:., _i1, [{:__aliases__, _i2, [_struct]}, _field]}, _i3, []} ->
        map
-    {op,info, args} when op in [:+, :-, :/, :*] ->
+    {op,_info, args} when op in [:+, :-, :/, :*] ->
      # IO.inspect "Aqui"
       Enum.reduce(args,map, fn x,acc -> find_function_calls_exp(acc,x) end)
 
-    {op, info, args} when op in [ :<=, :<, :>, :>=, :&&, :||, :!,:!=,:==] ->
+    {op, _info, args} when op in [ :<=, :<, :>, :>=, :&&, :||, :!,:!=,:==] ->
       Enum.reduce(args,map, fn x,acc -> find_function_calls_exp(acc,x) end)
-    {var,info, nil} when is_atom(var) ->
+    {var,_info, nil} when is_atom(var) ->
        map
-    {fun,info, args} ->
+    {fun,_info, _args} ->
       #IO.inspect "Aqui2"
      {args,funs} = map
      if MapSet.member?(args,fun) do

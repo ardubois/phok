@@ -35,20 +35,20 @@ defmodule Hok.TypeInference do
       {_,_}       -> not_infered(t)
     end
   end
-  defmacro tinf(header, do: body) do
-   {_fname, _, para} = header
-   map = para
-   |> Enum.map(fn({p, _, _}) -> p end)
-   |> Map.new(fn x -> {x,:none} end)
-  # IO.inspect body
-   nmap = infer_types(map,body)
-   #IO.inspect nmap
-   :ok
-  end
+  #defmacro tinf(header, do: body) do
+  # {_fname, _, para} = header
+  # map = para
+  # |> Enum.map(fn({p, _, _}) -> p end)
+  # |> Map.new(fn x -> {x,:none} end)
+  ## IO.inspect body
+  # nmap = infer_types(map,body)
+  # #IO.inspect nmap
+  # :ok
+  #end
 
   ########################### adds return statement to functions that return an expression
 
-  defp add_return(map,body) do
+  def add_return(map,body) do
     if map[:return] == nil do
       body
     else
@@ -255,7 +255,7 @@ defmodule Hok.TypeInference do
                   #IO.inspect "return #{type}"
                   case inf_type do
                       :none -> map
-                       found_type ->  map = set_type_exp(map,inf_type,arg)
+                       found_type ->  map = set_type_exp(map,found_type,arg)
                                       map
                   end
                 nil -> raise "Function must have a return."
@@ -582,7 +582,7 @@ defp set_type_exp(map,type,exp) do
   end
 
 
-  defp infer_type_exp(map,exp) do
+  def infer_type_exp(map,exp) do
     type = find_type_exp(map,exp)
     if (type != :none) do
       set_type_exp(map,type,exp)

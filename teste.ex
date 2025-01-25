@@ -27,7 +27,7 @@ Hok.defmodule_jit PMap do
     threadsPerBlock = 128;
     numberOfBlocks = div(size + threadsPerBlock - 1, threadsPerBlock)
 
-    result_gpu =Hok.new_gnx(size,type)
+    result_gpu =Hok.new_gnx_fake(size,type)
 
     Hok.spawn_jit(&PMap.map_ske/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[v1,result_gpu,size, f])
     #result_gpu
@@ -41,9 +41,7 @@ end
 
 tensor = Nx.tensor([1,2,3,4],type: {:s, 32})
 
-Hok.new_gnx(tensor)
-
-gtensor = Hok.new_gnx(tensor)
+gtensor = Hok.new_gnx_fake(tensor)
 
 func = Hok.hok fn (x) -> x + 1 end
 
