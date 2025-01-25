@@ -47,4 +47,7 @@ func = Hok.hok fn (x) -> x + 1 end
 
 #PMap.map(gtensor,&PMap.inc/1)
 
+prev = System.monotonic_time()
 PMap.map(gtensor,func)
+next = System.monotonic_time()
+IO.puts "Hok\t\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
