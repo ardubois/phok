@@ -239,7 +239,10 @@ def new_gnx((%Nx.Tensor{data: data, type: type, shape: shape, names: name}) ) do
   %Nx.BinaryBackend{ state: array} = data
  # IO.inspect name
  # raise "hell"
-  {l,c} = shape
+  {l,c} = case shape do
+    {c} -> {1,c}
+    {l,c} -> {l,c}
+  end
   ref = case type do
      {:f,32} -> create_nx_ref_nif(array,l,c,Kernel.to_charlist("float"))
      {:f,64} -> create_nx_ref_nif(array,l,c,Kernel.to_charlist("double"))
