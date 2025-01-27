@@ -23,11 +23,11 @@ Hok.defmodule_jit PMap do
     type = Hok.get_type_gnx(v1)
     IO.inspect shape
     #raise "hell"
-    {size} = shape
+    {l,c} = shape
     threadsPerBlock = 128;
     numberOfBlocks = div(size + threadsPerBlock - 1, threadsPerBlock)
 
-    result_gpu =Hok.new_gnx(size,type)
+    result_gpu =Hok.new_gnx(l,c,type)
 
     Hok.spawn_jit(&PMap.map_ske/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[v1,result_gpu,size, f])
     #result_gpu
