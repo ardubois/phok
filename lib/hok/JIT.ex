@@ -185,7 +185,7 @@ def infer_types_actual_parameters([])do
 end
 def infer_types_actual_parameters([h|t])do
   case h do
-    {:nx, type, _shape, _name , :ref} ->
+    {:nx, type, _shape, _name , ref} ->
         case type do
           {:f,32} -> [:tfloat | infer_types_actual_parameters(t)]
           {:f,64} -> [:tdouble | infer_types_actual_parameters(t)]
