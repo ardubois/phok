@@ -31,11 +31,9 @@ std::unique_ptr<char[]> compile_to_ptx(const char* program_source) {
     if(rv != NVRTC_SUCCESS) fail("nvrtcCreateProgram", rv);
 
     // compile nvrtc program
-    std::vector<const char*> options = {
-        "--gpu-architecture=compute_30"
-    };
+    
     //options.push_back("-default-device");
-    rv = nvrtcCompileProgram(prog, options.size(), options.data());
+    rv = nvrtcCompileProgram(prog, 0, nullptr);
     if(rv != NVRTC_SUCCESS) {
         std::size_t log_size;
         rv = nvrtcGetProgramLogSize(prog, &log_size);
