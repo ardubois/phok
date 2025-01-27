@@ -29,7 +29,7 @@ std::unique_ptr<char[]> compile_to_ptx(const char* program_source) {
         nullptr
     );
     if(rv != NVRTC_SUCCESS) fail("nvrtcCreateProgram", rv);
-
+    printf("ok\n")
     // compile nvrtc program
     
     //options.push_back("-default-device");
