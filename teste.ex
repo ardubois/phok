@@ -21,7 +21,7 @@ Hok.defmodule_jit PMap do
   def map(v1, f) do
     shape = Hok.get_shape_gnx(v1)
     type = Hok.get_type_gnx(v1)
-   # IO.inspect shape
+    IO.inspect shape
     #raise "hell"
     {size} = shape
     threadsPerBlock = 128;
