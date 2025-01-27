@@ -19,16 +19,16 @@ Hok.defmodule_jit PMap do
     end
   end
   def map(v1, f) do
-    shape = Hok.get_shape_gnx(v1)
+    {l,c} = Hok.get_shape_gnx(v1)
     type = Hok.get_type_gnx(v1)
     IO.inspect shape
     #raise "hell"
-    {size} = shape
+    size = l*c
 
     threadsPerBlock = 128;
     numberOfBlocks = div(size + threadsPerBlock - 1, threadsPerBlock)
 
-    result_gpu =Hok.new_gnx(1,size,type)
+    result_gpu =Hok.new_gnx(l,c),type)
 
 
 
@@ -42,7 +42,7 @@ end
 #IO.inspect a
 #raise "hell"
 
-tensor = Nx.tensor([1,2,3,4],type: {:s, 32})
+tensor = Nx.tensor([[1,2,3,4]],type: {:s, 32})
 
 gtensor = Hok.new_gnx(tensor)
 
