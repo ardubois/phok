@@ -35,6 +35,7 @@ std::unique_ptr<char[]> compile_to_ptx(const char* program_source) {
     //options.push_back("-default-device");
     std::vector<const char*> options = {
         "--include-path=/lib/erlang/usr/include/",
+        "--include-path=/usr/include/",
         "--include-path=/usr/include/x86_64-linux-gnu/"
     };
     rv = nvrtcCompileProgram(prog, options.size(), options.data());
