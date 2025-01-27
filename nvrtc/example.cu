@@ -23,7 +23,7 @@ std::unique_ptr<char[]> compile_to_ptx(const char* program_source) {
     rv = nvrtcCreateProgram(
         &prog,
         program_source,
-        "program.cu",
+        nullptr,
         0,
         nullptr,
         nullptr
