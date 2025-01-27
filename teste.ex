@@ -29,6 +29,8 @@ Hok.defmodule_jit PMap do
 
     result_gpu =Hok.new_gnx(l,c,type)
 
+    size = l*c
+
     Hok.spawn_jit(&PMap.map_ske/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[v1,result_gpu,size, f])
     #result_gpu
   end
