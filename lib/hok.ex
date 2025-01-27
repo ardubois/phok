@@ -260,7 +260,7 @@ def new_gnx(l,c,type) do
     x -> raise "new_gmatrex: type #{x} not suported"
  end
 
- {:nx, type, {l,c}, [nil] , ref}
+ {:nx, type, {l,c}, [nil,nil] , ref}
 end
 
 def get_gnx({:nx, type, shape, name , ref}) do
@@ -269,10 +269,10 @@ def get_gnx({:nx, type, shape, name , ref}) do
     {:f,32} -> get_nx_nif(ref,l,c,Kernel.to_charlist("float"))
     {:f,64} -> get_nx_nif(ref,l,c,Kernel.to_charlist("double"))
     {:s,32} -> get_nx_nif(ref,l,c,Kernel.to_charlist("int"))
-    x -> raise "new_gmatrex: type #{x} not suported"
+    x -> raise "new_gnx: type #{x} not suported"
  end
 
-  %Nx.Tensor{data: %Nx.BinaryBackend{ state: get_matrex_nif(ref,l,c)}, type: type, shape: shape, names: name}
+  %Nx.Tensor{data: %Nx.BinaryBackend{ state: ref, type: type, shape: shape, names: name}
 end
 
 def new_gnx_fake(_size,type) do
