@@ -616,7 +616,7 @@ end
 ######## at compilation we build a representation for the kernel: {:ker, its type, its ast}
 ##### and leave a call to spawn
 
-def spawn_jit(k,_t,_b,l) do
+def spawn_jit(k,t,b,l) do
   {kast,fun_graph}  = load_ast(k)
   kernel_name = JIT.get_kernel_name(k)
   #IO.inspect ast
@@ -651,9 +651,11 @@ def spawn_jit(k,_t,_b,l) do
 
   IO.puts "COMPILATION: #{out}"
 
-  _args = process_args_no_fun(l)
+  args = process_args_no_fun(l)
 
-  _kernel = JIT.load_kernel(k)
+  kernel = JIT.load_kernel(k)
+
+  spawn_nif(kernel,t,b,args)
 
   #IO.inspect args
 
