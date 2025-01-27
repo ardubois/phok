@@ -28,7 +28,7 @@ Hok.defmodule_jit PMap do
     threadsPerBlock = 128;
     numberOfBlocks = div(size + threadsPerBlock - 1, threadsPerBlock)
 
-    result_gpu =Hok.new_gnx(l,c),type)
+    result_gpu =Hok.new_gnx(l,c,type)
 
 
 
