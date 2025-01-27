@@ -77,7 +77,7 @@ int main() {
     // initialize CUDA
     rv = cuInit(0);
     if(rv != CUDA_SUCCESS) fail("cuInit", rv);
-
+    printf("inicio\n");
     // compile program to ptx
     auto ptx = compile_to_ptx(program_source);
     std::cout << "PTX code:\n" << ptx.get() << std::endl;
