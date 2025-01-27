@@ -33,7 +33,10 @@ std::unique_ptr<char[]> compile_to_ptx(const char* program_source) {
     // compile nvrtc program
     
     //options.push_back("-default-device");
-    rv = nvrtcCompileProgram(prog, 1, "--include-path=/erlang/usr/include/erl_nif.h");
+    std::vector<const char*> options = {
+        "--include-path=/erlang/usr/include/erl_nif.h"
+    };
+    rv = nvrtcCompileProgram(prog, options.size(), options.data());
     if(rv != NVRTC_SUCCESS) {
         std::size_t log_size;
         rv = nvrtcGetProgramLogSize(prog, &log_size);
