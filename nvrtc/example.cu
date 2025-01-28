@@ -39,7 +39,12 @@ char* compile_to_ptx(const char* program_source) {
         "--include-path=/usr/include/",
         "--include-path=/usr/lib/",
         "--include-path=/usr/include/x86_64-linux-gnu/"
-    };
+        "--include-path=/usr/include/c++/11",
+        "--include-path=/usr/include/x86_64-linux-gnu/c++/11",
+        "--include-path=/usr/include/c++/11/backward",
+        "--include-path=/usr/lib/gcc/x86_64-linux-gnu/11/include",
+        "--include-path=/usr/local/include"
+ };
     rv = nvrtcCompileProgram(prog, options.size(), options.data());
     if(rv != NVRTC_SUCCESS) {
         std::size_t log_size;
