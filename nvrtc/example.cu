@@ -158,14 +158,14 @@ int main() {
   err = cuDeviceGet(&device, 0); // or some other device on your system
   if (err != CUDA_SUCCESS) {
         fprintf(stderr, "* Error initializing the CUDA context.\n");
-      //  cuCtxDetach(context);
+      //  cuCtxDestroy (context);
         exit(-1);
     }
 
   err = cuCtxCreate(&context, 0, device);
   if (err != CUDA_SUCCESS) {
         fprintf(stderr, "* Error initializing the CUDA context.\n");
-        cuCtxDetach(context);
+        cuCtxDestroy (context);
         exit(-1);
     }
 
@@ -174,7 +174,7 @@ int main() {
   cuModuleLoadDataEx(&module,  ptx, 0, 0, 0);
   if (err != CUDA_SUCCESS) {
         fprintf(stderr, "* Error initializing the CUDA context.\n");
-        cuCtxDetach(context);
+        cuCtxDestroy (context);
         exit(-1);
     }
   // And here is how you use your compiled PTX
@@ -182,7 +182,7 @@ int main() {
   cuModuleGetFunction(&kernel_addr, module, kernel_name);
   if (err != CUDA_SUCCESS) {
         fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
-        cuCtxDetach(context);
+        cuCtxDestroy (context);
         exit(-1);
     }
   //cuLaunchKernel(kernel_addr, 
