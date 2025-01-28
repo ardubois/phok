@@ -38,7 +38,7 @@ char* compile_to_ptx(const char* program_source) {
         "--include-path=/lib/erlang/usr/include/",
         "--include-path=/usr/include/",
         "--include-path=/usr/lib/",
-        "--include-path=/usr/include/x86_64-linux-gnu/"
+        "--include-path=/usr/include/x86_64-linux-gnu/",
         "--include-path=/usr/include/c++/11",
         "--include-path=/usr/include/x86_64-linux-gnu/c++/11",
         "--include-path=/usr/include/c++/11/backward",
