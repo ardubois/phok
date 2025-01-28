@@ -86,8 +86,6 @@ extern "C" __global__ void f(int* in, int* out) {
 )%%%";
 
 const char program2[] = R"%%%(
-#include "erl_nif.h"
-
 
 __device__
 int anon_45cf36d0dd(int x)
