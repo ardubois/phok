@@ -1,3 +1,4 @@
+#include "erl_nif.h"
 #include <cstdlib>
 #include <string>
 #include <vector>
@@ -15,7 +16,7 @@
 }
 
 
-std::unique_ptr<char[]> compile_to_ptx(const char* program_source) {
+char* compile_to_ptx(const char* program_source) {
     nvrtcResult rv;
 
     // create nvrtc program
@@ -59,15 +60,16 @@ std::unique_ptr<char[]> compile_to_ptx(const char* program_source) {
     std::size_t ptx_size;
     rv = nvrtcGetPTXSize(prog, &ptx_size);
     if(rv != NVRTC_SUCCESS) fail("nvrtcGetPTXSize", rv);
-
-    auto ptx = std::make_unique<char[]>(ptx_size);
-    rv = nvrtcGetPTX(prog, ptx.get());
+    char* ptx_source = new char[ptx_size];
+    nvrtcGetPTX(prog, ptx_source);
+  
+   
     if(rv != NVRTC_SUCCESS) fail("nvrtcGetPTX", rv);
-    assert(ptx[ptx_size - 1] == '\0');
+    assert(ptx_source[ptx_size - 1] == '\0');
 
     nvrtcDestroyProgram(&prog);
 
-    return ptx;
+    return ptx_source;
 }
 
 const char program_source[] = R"%%%(
@@ -177,13 +179,69 @@ extern "C" void map_ske_call(ErlNifEnv *env, const ERL_NIF_TERM argv[], ErlNifRe
 )%%%";
 
 int main() {
-    CUresult rv;
+    CUresult err;
+    CUdevice   device;
+    CUcontext  context;
+    CUmodule   module;
+    CUfunction function;
+    char       *kernel_name = (char*) "matSum";
 
     // initialize CUDA
-    rv = cuInit(0);
-    if(rv != CUDA_SUCCESS) fail("cuInit", rv);
-    printf("inicio\n");
+    err = cuInit(0);
+    
+    if(err != CUDA_SUCCESS)  
+      { char message[200];
+        const char *error;
+        cuGetErrorString(err, &error);
+        strcpy(message,"Error create_ref_nif: ");
+        strcat(message, error);
+        printf("%s\n",error);
+        exit(-1);
+        //enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+      }
+
+    
+
     // compile program to ptx
-    auto ptx = compile_to_ptx(program2);
-    std::cout << "PTX code:\n" << ptx.get() << std::endl;
+    char* ptx = compile_to_ptx(program2);
+   
+    printf("%s\n",ptx);
+
+  
+  // get device 0
+
+  err = cuDeviceGet(&device, 0); // or some other device on your system
+  if (err != CUDA_SUCCESS) {
+        fprintf(stderr, "* Error initializing the CUDA context.\n");
+      //  cuCtxDetach(context);
+        exit(-1);
+    }
+
+  err = cuCtxCreate(&context, 0, device);
+  if (err != CUDA_SUCCESS) {
+        fprintf(stderr, "* Error initializing the CUDA context.\n");
+        cuCtxDetach(context);
+        exit(-1);
+    }
+
+  // The magic happens here:
+  
+  cuModuleLoadDataEx(&module,  ptx, 0, 0, 0);
+  if (err != CUDA_SUCCESS) {
+        fprintf(stderr, "* Error initializing the CUDA context.\n");
+        cuCtxDetach(context);
+        exit(-1);
+    }
+  // And here is how you use your compiled PTX
+  CUfunction kernel_addr;
+  cuModuleGetFunction(&kernel_addr, module, kernel_name);
+  if (err != CUDA_SUCCESS) {
+        fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
+        cuCtxDetach(context);
+        exit(-1);
+    }
+  //cuLaunchKernel(kernel_addr, 
+   // launch parameters go here
+   // kernel arguments go here
+
 }
