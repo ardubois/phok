@@ -129,7 +129,7 @@ int main() {
     CUcontext  context;
     CUmodule   module;
     CUfunction function;
-    //char       *kernel_name = (char*) "map_ske";
+    char       *kernel_name = (char*) "map_ske";
 
     // initialize CUDA
     err = cuInit(0);
