@@ -133,19 +133,22 @@ static ERL_NIF_TERM new_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
 static ERL_NIF_TERM get_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   int nrow;
   int ncol;
-  ERL_NIF_TERM  result;
-  cudaError_t error_gpu;
-
-  ERL_NIF_TERM e_type_name = argv[3];
-  unsigned int size_type_name;
-  if (!enif_get_list_length(env,e_type_name,&size_type_name)) {
-      return enif_make_badarg(env);
-  }
-
   char type_name[1024];
-  enif_get_string(env,e_type_name,type_name,size_type_name+1,ERL_NIF_LATIN1);
 
-  
+  ERL_NIF_TERM  result;
+  CUdeviceptr dev_array;
+  CUresult err;
+
+
+  CUdeviceptr *array_res;
+
+    if (!enif_get_resource(env, argv[0], ARRAY_TYPE, (void **) &array_res)) {
+       return enif_make_badarg(env);
+    }
+
+  dev_array = *array_res;
+
+   
   if (!enif_get_int(env, argv[1], &nrow)) {
       return enif_make_badarg(env);
   }
@@ -153,16 +156,20 @@ static ERL_NIF_TERM get_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
   if (!enif_get_int(env, argv[2], &ncol)) {
       return enif_make_badarg(env);
   }
+
+  ERL_NIF_TERM e_type_name = argv[3];
+  unsigned int size_type_name;
+  if (!enif_get_list_length(env,e_type_name,&size_type_name)) {
+      return enif_make_badarg(env);
+  }
+
+  
+  enif_get_string(env,e_type_name,type_name,size_type_name+1,ERL_NIF_LATIN1);
+
   
   if (strcmp(type_name, "float") == 0) 
   {
-    float **array_res;
-
-    if (!enif_get_resource(env, argv[0], ARRAY_TYPE, (void **) &array_res)) {
-       return enif_make_badarg(env);
-    }
-
-    float *dev_array = *array_res;
+    
 
     int result_size = sizeof(float) * (nrow*ncol);
     int data_size = sizeof(float) * (nrow*ncol);
