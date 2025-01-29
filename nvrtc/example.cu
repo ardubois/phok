@@ -114,10 +114,11 @@ __global__
 void map_ske(int *a1, int *a2, int size)
 {
 int id = ((blockIdx.x * blockDim.x) + threadIdx.x);
-int r = g(a1[id]);
+//int r = g(a1[id]);
 if((id < size))
 {
-	a2[id] = anon_45cf36d0dd(a1[id]);
+	//a2[id] = anon_45cf36d0dd(a1[id]);
+  a2[id] = a1[id]+1;
 }
 
 }
