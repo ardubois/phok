@@ -252,7 +252,7 @@ static ERL_NIF_TERM get_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
 
 static ErlNifFunc nif_funcs[] = {
     {"new_gpu_array_nif", 3, new_gpu_array_nif},
-    {"get_gpu_array_nif", 4, new_gpu_array_nif}
+    {"get_gpu_array_nif", 4, get_gpu_array_nif}
    
 };
 
