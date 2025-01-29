@@ -129,7 +129,7 @@ int main() {
     CUcontext  context;
     CUmodule   module;
     CUfunction function;
-    char       *kernel_name = (char*) "map_ske";
+    //char       *kernel_name = (char*) "map_ske";
 
     // initialize CUDA
     err = cuInit(0);
@@ -179,7 +179,7 @@ int main() {
     }
   // And here is how you use your compiled PTX
   CUfunction kernel_addr;
-  err = cuModuleGetFunction(&kernel_addr, module, kernel_name);
+  err = cuModuleGetFunction(&kernel_addr, module, "map_ske");
   if (err != CUDA_SUCCESS) {
         printf("error: %d", err);
         fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
