@@ -10,6 +10,18 @@
 #include <cuda_runtime.h>
 #include <nvrtc.h>
 
+#define checkCudaErrors(err)  __checkCudaErrors (err, __FILE__, __LINE__)
+
+inline void __checkCudaErrors( CUresult err, const char *file, const int line )
+{
+    if( CUDA_SUCCESS != err) {
+        fprintf(stderr,
+                "CUDA Driver API error = %04d from file <%s>, line %i.\n",
+                err, file, line );
+        exit(-1);
+    }
+}
+
 [[noreturn]] void fail(const std::string& msg, int code) {
     std::cerr << "error: " << msg << " (" << code << ')' << std::endl;
     std::exit(EXIT_FAILURE);
@@ -200,5 +212,16 @@ int main() {
   //cuLaunchKernel(kernel_addr, 
    // launch parameters go here
    // kernel arguments go here
+
+   int size = 10;
+   int a[N], b[N], c[N];
+    CUdeviceptr d_a, d_b, d_c;
+
+   for (int i = 0; i < size; ++i) {
+        a[i] = i;
+   }     
+
+   checkCudaErrors( cuMemAlloc(d_a, sizeof(int) * size) );
+    checkCudaErrors( cuMemAlloc(d_b, sizeof(int) * size) );
 
 }
