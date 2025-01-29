@@ -180,15 +180,7 @@ int main() {
         exit(-1);
     }
 
-  int i;
- // err = cuModuleGetFunctionCount( &i, module )   ;
-  if (err != CUDA_SUCCESS) {
-        printf("error: %d\n", err);
-        fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
-        cuCtxDestroy (context);
-        exit(-1);
-    }
-//  printf("functions: %d\n",i);
+ 
 
   // And here is how you use your compiled PTX
   CUfunction kernel_addr;
@@ -204,8 +196,8 @@ int main() {
    // kernel arguments go here
 
    int size = 10;
-   int a[size], b[size], c[size];
-    CUdeviceptr d_a, d_b, d_c;
+   int a[size], b[size];
+    CUdeviceptr d_a, d_b;
 
    for (int i = 0; i < size; ++i) {
         a[i] = i;
@@ -236,4 +228,14 @@ int main() {
     }
 
    void *args[3] = { &d_a, &d_b, size };
+
+   cuLaunchKernel(function, size, 1, 1,  // Nx1x1 blocks
+                                    1, 1, 1,            // 1x1x1 threads
+                                    0, 0, args, 0) );
+
+  cuMemcpyDtoH(b, d_b, sizeof(int) * size) ;
+
+   for (int i = 0; i < size; ++i) {
+        printf("result[%d] = %d\n", i, b[i]);
+   }     
 }  
