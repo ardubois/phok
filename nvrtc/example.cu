@@ -185,7 +185,7 @@ int main() {
 
   // And here is how you use your compiled PTX
  
-  err = cuModuleGetFunction(&function, module, "_Z7map_skePiS_i");
+  err = cuModuleGetFunction(&function, module, "map_ske");
 
   if (err != CUDA_SUCCESS) {
         printf("error: %d\n", err);
