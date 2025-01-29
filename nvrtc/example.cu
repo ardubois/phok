@@ -110,8 +110,8 @@ return (cc((a + a)));
 }
 
 
-__global__
-extern "C" void map_ske(int *a1, int *a2, int size)
+extern "C" __global__
+ void map_ske(int *a1, int *a2, int size)
 {
 int id = ((blockIdx.x * blockDim.x) + threadIdx.x);
 int r = g(1);
