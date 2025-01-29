@@ -198,7 +198,7 @@ int main() {
         cuCtxDestroy (context);
         exit(-1);
     }
-  printf("functions: %d\n",i);
+//  printf("functions: %d\n",i);
 
   // And here is how you use your compiled PTX
   CUfunction kernel_addr;
@@ -224,4 +224,6 @@ int main() {
    checkCudaErrors( cuMemAlloc(d_a, sizeof(int) * size) );
     checkCudaErrors( cuMemAlloc(d_b, sizeof(int) * size) );
 
-}
+   checkCudaErrors( cuMemcpyHtoD(d_a, a, sizeof(int) * size) );
+
+}  
