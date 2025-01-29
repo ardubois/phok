@@ -204,7 +204,7 @@ int main() {
    // kernel arguments go here
 
    int size = 10;
-   int a[N], b[N], c[N];
+   int a[size], b[size], c[size];
     CUdeviceptr d_a, d_b, d_c;
 
    for (int i = 0; i < size; ++i) {
