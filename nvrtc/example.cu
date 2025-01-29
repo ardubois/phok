@@ -227,11 +227,11 @@ int main() {
         exit(-1);
     }
 
-   void *args[3] = { &d_a, &d_b, size };
+   void *args[3] = { &d_a, &d_b, &size };
 
    cuLaunchKernel(function, size, 1, 1,  // Nx1x1 blocks
                                     1, 1, 1,            // 1x1x1 threads
-                                    0, 0, args, 0) );
+                                    0, 0, args, 0) ;
 
   cuMemcpyDtoH(b, d_b, sizeof(int) * size) ;
 
