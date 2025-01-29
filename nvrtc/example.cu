@@ -187,6 +187,7 @@ int main() {
   // And here is how you use your compiled PTX
  
   err = cuModuleGetFunction(&function, module, "_Z7map_skePiS_i");
+
   if (err != CUDA_SUCCESS) {
         printf("error: %d\n", err);
         fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
@@ -235,18 +236,15 @@ int main() {
                                     1, 1, 1,            // 1x1x1 threads
                                     0, 0, args, 0) ;
   
-  char message[200];
+ 
+
+   if (err != CUDA_SUCCESS) {
+         char message[200];
         const char *error;
         cuGetErrorString(err, &error);
         strcpy(message,"Error create_ref_nif: ");
         strcat(message, error);
         printf("%s\n",error);
-        exit(-1);
-
-   if (err != CUDA_SUCCESS) {
-        printf("error: %d\n", err);
-        fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
-        cuCtxDestroy (context);
         exit(-1);
     }
 
