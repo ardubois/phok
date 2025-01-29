@@ -1,4 +1,4 @@
-require Hok
+require PHok
 
 Nx.tensor([[1,2,3,4]],type: {:s, 32})
   |> PHok.new_gnx
