@@ -211,7 +211,7 @@ int main() {
         a[i] = i;
    }     
 
-   err = cuMemAlloc(d_a, sizeof(int) * size) ;
+   err = cuMemAlloc(&d_a, sizeof(int) * size) ;
     if (err != CUDA_SUCCESS) {
         printf("error: %d\n", err);
         fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
@@ -219,7 +219,7 @@ int main() {
         exit(-1);
     }
 
-   err = cuMemAlloc(d_b, sizeof(int) * size) ;
+   err = cuMemAlloc(&d_b, sizeof(int) * size) ;
     if (err != CUDA_SUCCESS) {
         printf("error: %d\n", err);
         fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
