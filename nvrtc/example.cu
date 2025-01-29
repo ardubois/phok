@@ -181,6 +181,7 @@ int main() {
   CUfunction kernel_addr;
   err = cuModuleGetFunction(&kernel_addr, module, kernel_name);
   if (err != CUDA_SUCCESS) {
+        printf("error: %d", err);
         fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
         cuCtxDestroy (context);
         exit(-1);
