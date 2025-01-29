@@ -300,9 +300,6 @@ end
 def create_gpu_array_nx_nif(_matrex,_l,_c,_type) do
   raise "NIF create_gpu_array_nx_nif/4 not implemented"
 end
-  def create_ref_nif(_matrex) do
-    raise "NIF create_ref_nif/1 not implemented"
-end
 
 
 
