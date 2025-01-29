@@ -250,9 +250,166 @@ static ERL_NIF_TERM get_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
 }
 
 
+static ERL_NIF_TERM create_gpu_array_nx_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+  ErlNifBinary  array_el;
+  
+  int nrow,ncol;
+
+  CUresult err;
+  CUpointer     dev_array;
+  
+  if (!enif_inspect_binary(env, argv[0], &matrix_el)) return enif_make_badarg(env);
+
+  if (!enif_get_int(env, argv[1], &nrow)) {
+      return enif_make_badarg(env);
+  }
+  
+  if (!enif_get_int(env, argv[2], &ncol)) {
+      return enif_make_badarg(env);
+  }
+
+  ERL_NIF_TERM e_type_name = argv[3];
+  unsigned int size_type_name;
+  if (!enif_get_list_length(env,e_type_name,&size_type_name)) {
+      return enif_make_badarg(env);
+  }
+
+ char type_name[1024];
+  
+  enif_get_string(env,e_type_name,type_name,size_type_name+1,ERL_NIF_LATIN1);
+
+  // FINAL TERM TO BE RETURNED:
+  ERL_NIF_TERM term;
+
+  if (strcmp(type_name, "float") == 0) 
+  { 
+    
+    float         *array;
+    
+    array = (float *) matrix_el.data;
+
+   int data_size = sizeof(float)* ncol*nrow;
+
+    ///// MAKE CUDA CALL
+    err = cuMemAlloc(&dev_array, data_size) ;
+    cudaMalloc( (void**)&dev_matrix, data_size);
+    if(err != CUDA_SUCCESS)  
+      { char message[200];
+        const char *error;
+        cuGetErrorString(err, &error);
+        strcpy(message,"Error create_gpu_array_nx_nif: ");
+        strcat(message, error);
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+    }
+  ///// MAKE CUDA CALL
+    err= cuMemcpyHtoD(dev_array, array, data_size) ;
+     if(err != CUDA_SUCCESS)  
+      { char message[200];
+        const char *error;
+        cuGetErrorString(err, &error);
+        strcpy(message,"Error create_gpu_array_nx_nif: ");
+        strcat(message, error);
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+    }
+  
+  /////////// END CUDA CALL
+
+    
+
+  } 
+  else if (strcmp(type_name, "int") == 0)
+  {
+    int         *matrix;
+    array = (int *) matrix_el.data;
+    
+    int data_size = sizeof(int)* ncol*nrow;
+
+     ///// MAKE CUDA CALL
+    err = cuMemAlloc(&dev_array, data_size) ;
+    cudaMalloc( (void**)&dev_matrix, data_size);
+    if(err != CUDA_SUCCESS)  
+      { char message[200];
+        const char *error;
+        cuGetErrorString(err, &error);
+        strcpy(message,"Error create_gpu_array_nx_nif: ");
+        strcat(message, error);
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+    }
+  ///// MAKE CUDA CALL
+    err= cuMemcpyHtoD(dev_array, array, data_size) ;
+     if(err != CUDA_SUCCESS)  
+      { char message[200];
+        const char *error;
+        cuGetErrorString(err, &error);
+        strcpy(message,"Error create_gpu_array_nx_nif: ");
+        strcat(message, error);
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+    }
+  
+  /////////// END CUDA CALL
+
+
+
+  }
+  else if (strcmp(type_name, "double") == 0)
+  {
+    double        *array;
+ 
+    array = (double *) matrix_el.data;
+
+    int data_size = sizeof(double)* ncol*nrow;
+    
+    err = cuMemAlloc(&dev_array, data_size) ;
+    cudaMalloc( (void**)&dev_matrix, data_size);
+    if(err != CUDA_SUCCESS)  
+      { char message[200];
+        const char *error;
+        cuGetErrorString(err, &error);
+        strcpy(message,"Error create_gpu_array_nx_nif: ");
+        strcat(message, error);
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+    }
+  ///// MAKE CUDA CALL
+    err= cuMemcpyHtoD(dev_array, array, data_size) ;
+     if(err != CUDA_SUCCESS)  
+      { char message[200];
+        const char *error;
+        cuGetErrorString(err, &error);
+        strcpy(message,"Error create_gpu_array_nx_nif: ");
+        strcat(message, error);
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+    }
+  
+  /////////// END CUDA CALL
+
+     
+  }
+ /* more else if clauses */
+ else /* default: */
+ {
+
+  
+    char message[200];
+        strcpy(message,"Error create_gpu_array_nx_nif: unknown type: ");
+        strcat(message, type_name);
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+ }
+
+  CUPointer *gpu_res = (CUPointer*)enif_alloc_resource(ARRAY_TYPE, sizeof(CUPointer));
+  *gpu_res = dev_array;
+  term = enif_make_resource(env, gpu_res);
+  // ...and release the resource so that it will be freed when Erlang garbage collects
+  enif_release_resource(gpu_res);
+  return term;
+}
+
+
+
+
 static ErlNifFunc nif_funcs[] = {
     {"new_gpu_array_nif", 3, new_gpu_array_nif},
-    {"get_gpu_array_nif", 4, get_gpu_array_nif}
+    {"get_gpu_array_nif", 4, get_gpu_array_nif},
+    {"create_gpu_array_nx_nif", 4, create_gpu_array_nx_nif}
    
 };
 
