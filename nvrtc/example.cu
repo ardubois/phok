@@ -185,8 +185,8 @@ int main() {
  
 
   // And here is how you use your compiled PTX
-  CUfunction kernel_addr;
-  err = cuModuleGetFunction(&kernel_addr, module, "_Z7map_skePiS_i");
+ 
+  err = cuModuleGetFunction(&function, module, "_Z7map_skePiS_i");
   if (err != CUDA_SUCCESS) {
         printf("error: %d\n", err);
         fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
