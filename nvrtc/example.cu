@@ -118,7 +118,8 @@ int r = g(a1[id]);
 if((id < size))
 {
 	//a2[id] = anon_45cf36d0dd(a1[id]);
-  a2[id] = a1[id]+1;
+ // a2[id] = a1[id]+1;
+ a2[id] = 1;
 }
 
 }
