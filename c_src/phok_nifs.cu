@@ -412,4 +412,4 @@ static ErlNifFunc nif_funcs[] = {
    
 };
 
-ERL_NIF_INIT(Elixir.PHok, nif_funcs, &load, NULL, NULL, NULL)
+ERL_NIF_INIT(Elixir.Hok, nif_funcs, &load, NULL, NULL, NULL)
