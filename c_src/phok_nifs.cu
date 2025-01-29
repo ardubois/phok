@@ -258,7 +258,7 @@ static ERL_NIF_TERM create_gpu_array_nx_nif(ErlNifEnv *env, int argc, const ERL_
   CUresult err;
   CUdeviceptr     dev_array;
   
-  if (!enif_inspect_binary(env, argv[0], &matrix_el)) return enif_make_badarg(env);
+  if (!enif_inspect_binary(env, argv[0], &array_el)) return enif_make_badarg(env);
 
   if (!enif_get_int(env, argv[1], &nrow)) {
       return enif_make_badarg(env);
@@ -292,7 +292,7 @@ static ERL_NIF_TERM create_gpu_array_nx_nif(ErlNifEnv *env, int argc, const ERL_
 
     ///// MAKE CUDA CALL
     err = cuMemAlloc(&dev_array, data_size) ;
-    cudaMalloc( (void**)&dev_matrix, data_size);
+  
     if(err != CUDA_SUCCESS)  
       { char message[200];
         const char *error;
@@ -326,7 +326,7 @@ static ERL_NIF_TERM create_gpu_array_nx_nif(ErlNifEnv *env, int argc, const ERL_
 
      ///// MAKE CUDA CALL
     err = cuMemAlloc(&dev_array, data_size) ;
-    cudaMalloc( (void**)&dev_matrix, data_size);
+  
     if(err != CUDA_SUCCESS)  
       { char message[200];
         const char *error;
@@ -360,7 +360,6 @@ static ERL_NIF_TERM create_gpu_array_nx_nif(ErlNifEnv *env, int argc, const ERL_
     int data_size = sizeof(double)* ncol*nrow;
     
     err = cuMemAlloc(&dev_array, data_size) ;
-    cudaMalloc( (void**)&dev_matrix, data_size);
     if(err != CUDA_SUCCESS)  
       { char message[200];
         const char *error;
