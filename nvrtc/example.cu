@@ -235,4 +235,5 @@ int main() {
         exit(-1);
     }
 
+   void *args[3] = { &d_a, &d_b, size };
 }  
