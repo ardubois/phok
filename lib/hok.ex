@@ -304,7 +304,7 @@ end
     raise "NIF create_ref_nif/1 not implemented"
 end
 
-end
+
 
 
 ######################################
