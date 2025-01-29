@@ -286,7 +286,7 @@ static ERL_NIF_TERM create_gpu_array_nx_nif(ErlNifEnv *env, int argc, const ERL_
     
     float         *array;
     
-    array = (float *) matrix_el.data;
+    array = (float *) array_el.data;
 
    int data_size = sizeof(float)* ncol*nrow;
 
@@ -319,8 +319,8 @@ static ERL_NIF_TERM create_gpu_array_nx_nif(ErlNifEnv *env, int argc, const ERL_
   } 
   else if (strcmp(type_name, "int") == 0)
   {
-    int         *matrix;
-    array = (int *) matrix_el.data;
+    int         *array;
+    array = (int *) array_el.data;
     
     int data_size = sizeof(int)* ncol*nrow;
 
@@ -355,7 +355,7 @@ static ERL_NIF_TERM create_gpu_array_nx_nif(ErlNifEnv *env, int argc, const ERL_
   {
     double        *array;
  
-    array = (double *) matrix_el.data;
+    array = (double *) array_el.data;
 
     int data_size = sizeof(double)* ncol*nrow;
     
