@@ -177,11 +177,22 @@ int main() {
         cuCtxDestroy (context);
         exit(-1);
     }
+
+  int i;
+  err = cuModuleGetFunctionCount ( &i, module )   
+  if (err != CUDA_SUCCESS) {
+        printf("error: %d\n", err);
+        fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
+        cuCtxDestroy (context);
+        exit(-1);
+    }
+  printf("functions: %d\n",i);
+
   // And here is how you use your compiled PTX
   CUfunction kernel_addr;
   err = cuModuleGetFunction(&kernel_addr, module, "map_ske");
   if (err != CUDA_SUCCESS) {
-        printf("error: %d", err);
+        printf("error: %d\n", err);
         fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
         cuCtxDestroy (context);
         exit(-1);
