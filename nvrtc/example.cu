@@ -117,7 +117,7 @@ int id = ((blockIdx.x * blockDim.x) + threadIdx.x);
 int r = g(1);
 if((id < size))
 {
-	a2[id] = anon_45cf36d0dd(a1[id]);
+	a2[id] = anon_45cf36d0dd(a1[id]) + r;
   
 }
 
