@@ -171,7 +171,7 @@ int main() {
 
   // The magic happens here:
   
-  cuModuleLoadDataEx(&module,  ptx, 0, 0, 0);
+  err = cuModuleLoadDataEx(&module,  ptx, 0, 0, 0);
   if (err != CUDA_SUCCESS) {
         fprintf(stderr, "* Error initializing the CUDA context.\n");
         cuCtxDestroy (context);
@@ -179,7 +179,7 @@ int main() {
     }
   // And here is how you use your compiled PTX
   CUfunction kernel_addr;
-  cuModuleGetFunction(&kernel_addr, module, kernel_name);
+  err = cuModuleGetFunction(&kernel_addr, module, kernel_name);
   if (err != CUDA_SUCCESS) {
         fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
         cuCtxDestroy (context);
