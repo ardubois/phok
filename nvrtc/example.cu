@@ -10,17 +10,7 @@
 #include <cuda_runtime.h>
 #include <nvrtc.h>
 
-#define checkCudaErrors(err)  __checkCudaErrors (err, __FILE__, __LINE__)
 
-inline void __checkCudaErrors( CUresult err, const char *file, const int line )
-{
-    if( CUDA_SUCCESS != err) {
-        fprintf(stderr,
-                "CUDA Driver API error = %04d from file <%s>, line %i.\n",
-                err, file, line );
-        exit(-1);
-    }
-}
 
 [[noreturn]] void fail(const std::string& msg, int code) {
     std::cerr << "error: " << msg << " (" << code << ')' << std::endl;
@@ -221,9 +211,28 @@ int main() {
         a[i] = i;
    }     
 
-   checkCudaErrors( cuMemAlloc(d_a, sizeof(int) * size) );
-    checkCudaErrors( cuMemAlloc(d_b, sizeof(int) * size) );
+   err = cuMemAlloc(d_a, sizeof(int) * size) ;
+    if (err != CUDA_SUCCESS) {
+        printf("error: %d\n", err);
+        fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
+        cuCtxDestroy (context);
+        exit(-1);
+    }
 
-   checkCudaErrors( cuMemcpyHtoD(d_a, a, sizeof(int) * size) );
+   err = cuMemAlloc(d_b, sizeof(int) * size) ;
+    if (err != CUDA_SUCCESS) {
+        printf("error: %d\n", err);
+        fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
+        cuCtxDestroy (context);
+        exit(-1);
+    }
+
+   err= cuMemcpyHtoD(d_a, a, sizeof(int) * size) ;
+    if (err != CUDA_SUCCESS) {
+        printf("error: %d\n", err);
+        fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
+        cuCtxDestroy (context);
+        exit(-1);
+    }
 
 }  
