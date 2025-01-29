@@ -2,7 +2,6 @@ defmodule Hok do
   @on_load :load_nifs
   def load_nifs do
       :erlang.load_nif('./priv/gpu_nifs', 0)
-      :erlang.load_nif('./priv/phok_nifs', 0)
       #IO.puts("ok")
   end
 
