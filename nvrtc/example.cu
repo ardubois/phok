@@ -80,12 +80,6 @@ char* compile_to_ptx(const char* program_source) {
     return ptx_source;
 }
 
-const char program_source[] = R"%%%(
-//#include <stdint.h>
-extern "C" __global__ void f(int* in, int* out) {
-    out[threadIdx.x] = in[threadIdx.x];
-}
-)%%%";
 
 const char program2[] = R"%%%(
 
@@ -229,7 +223,10 @@ int main() {
         exit(-1);
     }
 
-   void *args[3] = { &d_a, &d_b, &size };
+   void *args[3];
+   args[0] = (void*)  &d_a;
+   args[1] = (void*) &d_b;
+   args[2] = (void*) &size;
 
    err = cuLaunchKernel(function, size, 1, 1,  // Nx1x1 blocks
                                     1, 1, 1,            // 1x1x1 threads
