@@ -179,7 +179,7 @@ int main() {
     }
 
   int i;
-  err = cuModuleGetFunctionCount ( &i, module )   
+  err = cuModuleGetFunctionCount ( &i, module )   ;
   if (err != CUDA_SUCCESS) {
         printf("error: %d\n", err);
         fprintf(stderr, "* Error getting kernel function %s\n", kernel_name);
