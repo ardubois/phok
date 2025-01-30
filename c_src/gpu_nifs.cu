@@ -76,7 +76,8 @@ static ERL_NIF_TERM get_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
   CUdeviceptr dev_array;
   CUresult err;
 
-  // cuInit(0);
+ init_cuda(env);
+
   CUdeviceptr *array_res;
 
     if (!enif_get_resource(env, argv[0], ARRAY_TYPE, (void **) &array_res)) {
@@ -363,6 +364,8 @@ static ERL_NIF_TERM new_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
   
   CUresult err;
   CUdeviceptr dev_array;
+
+   init_cuda(env);
   
   if (!enif_get_int(env, argv[0], &nrow)) {
       return enif_make_badarg(env);
