@@ -175,7 +175,15 @@ static ERL_NIF_TERM create_gpu_array_nx_nif(ErlNifEnv *env, int argc, const ERL_
   CUdeviceptr     dev_array;
   
 
- //  cuInit(0);
+ err =  cuInit(0);
+ if(err != CUDA_SUCCESS)  
+      { char message[200];
+        const char *error;
+        cuGetErrorString(err, &error);
+        strcpy(message,"Error create_gpu_array_nx_nif0: ");
+        strcat(message, error);
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+    }
 
   if (!enif_inspect_binary(env, argv[0], &array_el)) return enif_make_badarg(env);
 
