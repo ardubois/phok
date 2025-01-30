@@ -307,7 +307,7 @@ static ERL_NIF_TERM create_gpu_array_nx_nif(ErlNifEnv *env, int argc, const ERL_
       { char message[200];
         const char *error;
         cuGetErrorString(err, &error);
-        strcpy(message,"Error create_gpu_array_nx_nif: ");
+        strcpy(message,"Error create_gpu_array_nx_nif1: ");
         strcat(message, error);
         enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
     }
@@ -317,7 +317,7 @@ static ERL_NIF_TERM create_gpu_array_nx_nif(ErlNifEnv *env, int argc, const ERL_
       { char message[200];
         const char *error;
         cuGetErrorString(err, &error);
-        strcpy(message,"Error create_gpu_array_nx_nif: ");
+        strcpy(message,"Error create_gpu_array_nx_nif2: ");
         strcat(message, error);
         enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
     }
