@@ -67,6 +67,46 @@ load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
   return 0;
 }
 
+static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+
+    ERL_NIF_TERM list;
+    ERL_NIF_TERM head;
+    ERL_NIF_TERM tail;
+
+    const ERL_NIF_TERM *tuple_blocks;
+    const ERL_NIF_TERM *tuple_threads;
+    int arity;
+
+    ERL_NIF_TERM e_code = argv[0];
+    unsigned int size_code;
+    if (!enif_get_list_length(env,e_type_name,&size_code)) {
+      return enif_make_badarg(env);
+    }
+
+   char code[size_code+1];
+   
+   enif_get_string(env,e_code,code,size_code+1,ERL_NIF_LATIN1);
+  
+   if (!enif_get_tuple(env, argv[1], &arity, &tuple_blocks)) {
+      printf ("spawn: blocks argument is not a tuple");
+    }
+
+    if (!enif_get_tuple(env, argv[2], &arity, &tuple_threads)) {
+      printf ("spawn:threads argument is not a tuple");
+    }
+    int b1,b2,b3,t1,t2,t3;
+
+    enif_get_int(env,tuple_blocks[0],&b1);
+    enif_get_int(env,tuple_blocks[1],&b2);
+    enif_get_int(env,tuple_blocks[2],&b3);
+    enif_get_int(env,tuple_threads[0],&t1);
+    enif_get_int(env,tuple_threads[1],&t2);
+    enif_get_int(env,tuple_threads[2],&t3);
+
+
+  
+
+}  
 
 static ERL_NIF_TERM get_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   int nrow;
@@ -1262,6 +1302,7 @@ static ERL_NIF_TERM spawn_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[
 }
 
 static ErlNifFunc nif_funcs[] = {
+    {"jit_compile_and_launch_nif",4,jit_compile_and_launch_nif},
     {"new_gpu_array_nif", 3, new_gpu_array_nif},
     {"get_gpu_array_nif", 4, get_gpu_array_nif},
     {"create_gpu_array_nx_nif", 4, create_gpu_array_nx_nif},
