@@ -55,7 +55,7 @@ static ERL_NIF_TERM get_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
   CUdeviceptr dev_array;
   CUresult err;
 
-   cuInit(0);
+  // cuInit(0);
   CUdeviceptr *array_res;
 
     if (!enif_get_resource(env, argv[0], ARRAY_TYPE, (void **) &array_res)) {
