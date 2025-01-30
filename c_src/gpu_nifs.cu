@@ -26,10 +26,10 @@ void init_cuda(ErlNifEnv *env)
         strcpy(message,"Error INIT CUDA: ");
         strcat(message, error);
         enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
-    }
-    else {cuCtxSetCurrent(context);}
+      }
+    
       
-    }
+    } else {cuCtxSetCurrent(context);}
 }
 
 #define MX_ROWS(matrix) (((uint32_t*)matrix)[0])
