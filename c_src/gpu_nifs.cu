@@ -35,6 +35,7 @@ dev_pinned_array_destructor(ErlNifEnv *env, void *res) {
 
 static int
 load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
+  cuInit(0);
   KERNEL_TYPE =
   enif_open_resource_type(env, NULL, "kernel", NULL, ERL_NIF_RT_CREATE  , NULL);
   ARRAY_TYPE =
