@@ -175,7 +175,7 @@ static ERL_NIF_TERM create_gpu_array_nx_nif(ErlNifEnv *env, int argc, const ERL_
   CUdeviceptr     dev_array;
   
 
-   cuInit(0);
+ //  cuInit(0);
 
   if (!enif_inspect_binary(env, argv[0], &array_el)) return enif_make_badarg(env);
 
