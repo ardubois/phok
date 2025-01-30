@@ -16,7 +16,7 @@ void init_cuda(ErlNifEnv *env)
     {
        CUresult err;
        int device = 0;
-       printf("Aqui!!!!!!!!!!11\n");
+       
        cuInit(0);
        err = cuCtxCreate(&context, 0, device);
        if(err != CUDA_SUCCESS)  
@@ -27,6 +27,7 @@ void init_cuda(ErlNifEnv *env)
         strcat(message, error);
         enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
     }
+    else {cuCtxSetCurrent(context);}
       
     }
 }
