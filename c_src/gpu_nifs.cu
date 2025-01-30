@@ -79,7 +79,7 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
 
     ERL_NIF_TERM e_code = argv[0];
     unsigned int size_code;
-    if (!enif_get_list_length(env,e_type_name,&size_code)) {
+    if (!enif_get_list_length(env,e_code,&size_code)) {
       return enif_make_badarg(env);
     }
 
