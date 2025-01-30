@@ -35,7 +35,7 @@ dev_pinned_array_destructor(ErlNifEnv *env, void *res) {
 
 static int
 load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
-  cuInit(0);
+
   KERNEL_TYPE =
   enif_open_resource_type(env, NULL, "kernel", NULL, ERL_NIF_RT_CREATE  , NULL);
   ARRAY_TYPE =
@@ -55,7 +55,7 @@ static ERL_NIF_TERM get_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
   CUdeviceptr dev_array;
   CUresult err;
 
-
+   cuInit(0);
   CUdeviceptr *array_res;
 
     if (!enif_get_resource(env, argv[0], ARRAY_TYPE, (void **) &array_res)) {
