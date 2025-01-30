@@ -9,6 +9,27 @@
 #include <cuda_runtime.h>
 #include <nvrtc.h>
 
+CUcontext  context = NULL;
+void init_cuda(ErlNifEnv *env)
+{
+  if (context == NULL)
+    {
+       CUresult err;
+       int device = 0;
+
+       cuInit(0);
+       err = cuCtxCreate(&context, 0, device);
+       if(err != CUDA_SUCCESS)  
+      { char message[200];
+        const char *error;
+        cuGetErrorString(err, &error);
+        strcpy(message,"Error INIT CUDA: ");
+        strcat(message, error);
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+    }
+      
+    }
+}
 
 #define MX_ROWS(matrix) (((uint32_t*)matrix)[0])
 #define MX_COLS(matrix) (((uint32_t*)matrix)[1])
@@ -175,15 +196,9 @@ static ERL_NIF_TERM create_gpu_array_nx_nif(ErlNifEnv *env, int argc, const ERL_
   CUdeviceptr     dev_array;
   
 
- err =  cuInit(0);
- if(err != CUDA_SUCCESS)  
-      { char message[200];
-        const char *error;
-        cuGetErrorString(err, &error);
-        strcpy(message,"Error create_gpu_array_nx_nif0: ");
-        strcat(message, error);
-        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
-    }
+ init_cuda(env);
+
+ 
 
   if (!enif_inspect_binary(env, argv[0], &array_el)) return enif_make_badarg(env);
 
