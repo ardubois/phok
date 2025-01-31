@@ -220,9 +220,10 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
  // CUcontext  context2 = NULL;
  // err = cuCtxCreate(&context2, 0, device);
   err = cuModuleLoadDataEx(&module,  ptx, 0, 0, 0);
+  printf("befor compile\n");
   if (err != CUDA_SUCCESS) fail_cuda(env,err,"cuModuleLoadData jit compile");
 
- 
+ printf("after compile\n");
   // And here is how you use your compiled PTX
  
   err = cuModuleGetFunction(&function, module, "map_ske");
