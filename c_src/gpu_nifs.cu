@@ -180,6 +180,8 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
     CUmodule   module;
     CUfunction function;
     CUresult err;
+
+    init_cuda(env);
   
     ERL_NIF_TERM e_code = argv[0];
     unsigned int size_code;
