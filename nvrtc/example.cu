@@ -62,7 +62,7 @@ char* compile_to_ptx(const char* program_source) {
         if(rv != NVRTC_SUCCESS) fail("nvrtcGetProgramLog", rv);
         assert(log[log_size - 1] == '\0');
 
-        std::cerr << "Compile error; log:\n" << log.get() << std::endl;
+        printf("Compile error; log: %s\n", log);
 
         fail("nvrtcCompileProgram", rv);
     }
