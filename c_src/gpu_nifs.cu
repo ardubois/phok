@@ -169,9 +169,13 @@ char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
 
 static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 
-    ERL_NIF_TERM list;
-    ERL_NIF_TERM head;
-    ERL_NIF_TERM tail;
+    ERL_NIF_TERM list_types;
+    ERL_NIF_TERM head_types;
+    ERL_NIF_TERM tail_types;
+
+    ERL_NIF_TERM list_args;
+    ERL_NIF_TERM head_args;
+    ERL_NIF_TERM tail_args;
 
     const ERL_NIF_TERM *tuple_blocks;
     const ERL_NIF_TERM *tuple_threads;
@@ -223,9 +227,16 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
     enif_get_int(env,tuple_threads[1],&t2);
     enif_get_int(env,tuple_threads[2],&t3);
 
-   printf("%s\n",code);
+  int size_args;
+
+  if (!enif_get_int(env, argv[4], &size_args)) {
+      return enif_make_badarg(env);
+  }
+
+  // printf("%s\n",code);
    //printf("Args: %d %d %d %d %d %d\n",b1,b2,b3,t1,t2,t3);
 
+  printf("size args %d\n",size_args);
   char* ptx = compile_to_ptx(env,code);
    printf("%s",ptx);
 
@@ -234,15 +245,98 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
  // CUcontext  context2 = NULL;
  // err = cuCtxCreate(&context2, 0, device);
   err = cuModuleLoadDataEx(&module,  ptx, 0, 0, 0);
-  printf("befor compile\n");
+
   if (err != CUDA_SUCCESS) fail_cuda(env,err,"cuModuleLoadData jit compile");
 
- printf("after compile\n");
   // And here is how you use your compiled PTX
  
   err = cuModuleGetFunction(&function, module, kernel_name);
-  printf("after load\n");
+
   if (err != CUDA_SUCCESS) fail_cuda(env,err,"cuModuleGetFunction jit compile");
+
+
+  void *args[size_args];
+
+  list_types = argv[5];
+  list_args = argv[6];
+
+  for(int i=0; i<size_args; i++)
+  {
+    char type_name[1024];
+    unsigned int size_type;
+    if (!enif_get_list_cell(env,list_types,&head_types,&tail_types))
+    { printf("erro get list cell\n");
+      return enif_make_badarg(env);
+    }
+    if (!enif_get_list_length(env,head_types,&size_type))
+    { printf("erro get list length\n");
+      return enif_make_badarg(env);
+    }
+    
+    enif_get_string(env,head_types,type_name,size_type+1,ERL_NIF_LATIN1);
+
+     if (!enif_get_list_cell(env,list_args,&head_args,&tail_args))
+       { printf("erro get list cell\n");
+          return enif_make_badarg(env);
+       }
+
+    
+    if (strcmp(type_name, "int") == 0) 
+    {
+      
+       int iarg;
+       enif_get_int(env, head_args, &iarg);
+       { printf("error getting it arg\n");
+          return enif_make_badarg(env);
+       }
+
+       args[i] = (void*)  &iarg;
+
+
+    } else if (strcmp(type_name, "tint") == 0)
+    {
+     
+      CUdeviceptr *array_res;
+      enif_get_resource(env, head_args, ARRAY_TYPE, (void **) &array_res);
+      CUdeviceptr aarg = *array_res;
+      
+      args[i] = (void*)  &aarg;
+
+    } else if (strcmp(type_name, "tfloat") == 0)
+    {
+      CUdeviceptr *array_res;
+      enif_get_resource(env, head_args, ARRAY_TYPE, (void **) &array_res);
+      CUdeviceptr aarg = *array_res;
+      
+      args[i] = (void*)  &aarg;
+
+     } else if (strcmp(type_name, "tdouble") == 0)
+    {
+
+      CUdeviceptr *array_res;
+      enif_get_resource(env, head_args, ARRAY_TYPE, (void **) &array_res);
+      CUdeviceptr aarg = *array_res;
+      
+      args[i] = (void*)  &aarg;
+    
+    } else{
+        printf("Type %s not suported\n", type_name);
+          return enif_make_badarg(env);
+    }
+    
+    
+    list_types = tail_types;
+    list_args = tail_args;
+  }
+
+
+  // LAUNCH KERNEL
+
+  err = cuLaunchKernel(function, b1, b2, b3,  // Nx1x1 blocks
+                                    t1, t2, t3,            // 1x1x1 threads
+                                    0, 0, args, 0) ;
+  
+  if (err != CUDA_SUCCESS) fail_cuda(env,err,"cuLaunchKernel jit compile");
 
    return enif_make_int(env, 0);
 }  
@@ -1451,7 +1545,7 @@ static ERL_NIF_TERM spawn_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[
 }
 
 static ErlNifFunc nif_funcs[] = {
-    {"jit_compile_and_launch_nif",5,jit_compile_and_launch_nif},
+    {"jit_compile_and_launch_nif",7,jit_compile_and_launch_nif},
     {"new_gpu_array_nif", 3, new_gpu_array_nif},
     {"get_gpu_array_nif", 4, get_gpu_array_nif},
     {"create_gpu_array_nx_nif", 4, create_gpu_array_nx_nif},

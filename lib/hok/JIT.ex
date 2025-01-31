@@ -95,7 +95,7 @@ def compile_kernel({:defk,_,[header,[body]]},inf_types,subs) do
    cuda_body = Hok.CudaBackend.gen_cuda_jit(body,inf_types,param_vars,"module",subs)
    k = Hok.CudaBackend.gen_kernel_jit(fname,param_list,cuda_body)
    accessfunc = Hok.CudaBackend.gen_kernel_call(fname,length(types_para),Enum.reverse(types_para))
-   IO.inspect accessfunc
+   IO.puts accessfunc
    "\n" <> k <> "\n\n" # <> accessfunc
 end
 
@@ -114,6 +114,17 @@ def gen_delta_from_type( {:fn, _, [{:->, _ , [para,_body]}] }, {return_type, typ
          |> Enum.zip(types)
          |> Map.new()
   Map.put(delta, :return, return_type)
+end
+def get_types_para({:defk,_,[header,[_body]]},  delta) do
+  {_, _, formal_para} = header
+  formal_para
+          |> Enum.map(fn({p, _, _}) -> delta[p] end)
+          |> Enum.filter(fn p -> case p do
+                                  {_, _} -> false
+                                      _ -> true
+                                  end
+                                  end)
+          |> Enum.map(fn x -> Kernel.to_charlist(to_string(x)) end)
 end
 def get_function_parameters_and_their_types({:defk,_,[header,[_body]]}, actual_para, delta) do
   {_, _, formal_para} = header

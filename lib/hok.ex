@@ -720,8 +720,11 @@ def spawn_jit(k,t,b,l) do
   #IO.puts "COMPILATION: #{out}"
 
   args = process_args_no_fun(l)
+  types_args = JIT.get_types_para(kast,inf_types)
 
-  jit_compile_and_launch_nif(Kernel.to_charlist(kernel_name),Kernel.to_charlist(prog),t,b,args)
+  #(_n,_k,_t,_b,_size,_types,_l)
+
+  jit_compile_and_launch_nif(Kernel.to_charlist(kernel_name),Kernel.to_charlist(prog),t,b, length(args), types_args,args)
   #IO.inspect args
 
   #IO.puts out
@@ -800,7 +803,7 @@ def spawn_nif(_k,_t,_b,_l) do
   raise "NIF spawn_nif/1 not implemented"
 end
 
-def jit_compile_and_launch_nif(_n,_k,_t,_b,_l) do
-  raise "NIF jit_compile_and_launch_nif/5 not implemented"
+def jit_compile_and_launch_nif(_n,_k,_t,_b,_size,_types,_l) do
+  raise "NIF jit_compile_and_launch_nif/7 not implemented"
 end
 end

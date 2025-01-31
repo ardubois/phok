@@ -28,7 +28,7 @@ Hok.defmodule_jit PMap do
     threadsPerBlock = 128;
     numberOfBlocks = div(size + threadsPerBlock - 1, threadsPerBlock)
 
-    result_gpu =Hok.new_gnx_fake(l*c,type)
+    result_gpu =Hok.new_gnx(l,c,type)
 
 
 
@@ -44,7 +44,7 @@ end
 
 tensor = Nx.tensor([[1,2,3,4]],type: {:s, 32})
 
-gtensor = Hok.new_gnx_fake(tensor)
+gtensor = Hok.new_gnx(tensor)
 
 func = Hok.hok fn (x) -> x + 1 end
 
@@ -52,7 +52,7 @@ func = Hok.hok fn (x) -> x + 1 end
 
 prev = System.monotonic_time()
 r = PMap.map(gtensor,func)
-#r = Hok.get_gnx(r)
+r = Hok.get_gnx(r)
 IO.inspect r
 next = System.monotonic_time()
 IO.puts "Hok\t\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
