@@ -283,10 +283,10 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
     
     if (strcmp(type_name, "int") == 0) 
     {
-      
+      printf("arg int\n") ;
        int iarg;
        enif_get_int(env, head_args, &iarg);
-       { printf("error getting it arg\n");
+       { printf("error getting int arg\n");
           return enif_make_badarg(env);
        }
 
@@ -295,7 +295,7 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
 
     } else if (strcmp(type_name, "tint") == 0)
     {
-     
+      printf("arg tint\n") ;
       CUdeviceptr *array_res;
       enif_get_resource(env, head_args, ARRAY_TYPE, (void **) &array_res);
       CUdeviceptr aarg = *array_res;
