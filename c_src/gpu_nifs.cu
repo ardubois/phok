@@ -80,8 +80,8 @@ void fail_cuda(ErlNifEnv *env, CUresult result, const char *obs){
        char message[1000];
         const char *error;
         strcpy(message,"Error  CUDA ");
-        strcpy(message,obs);
-        strcpy(message,": ");
+        strcat(message,obs);
+        strcat(message,": ");
         cuGetErrorString(result, &error);
         strcat(message, error);
         enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
@@ -94,8 +94,8 @@ void fail_nvrtc(ErlNifEnv *env,nvrtcResult result, const char *obs){
         char message[1000];
         
         strcpy(message,"Error  NVRTC ");
-        strcpy(message,obs);
-        strcpy(message,": ");
+        strcat(message,obs);
+        strcat(message,": ");
         strcat(message, nvrtcGetErrorString(result));
         enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
 
@@ -220,7 +220,7 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
  
   // And here is how you use your compiled PTX
  
-  err = cuModuleGetFunction(&function, module, "map_ske");
+  //err = cuModuleGetFunction(&function, module, "map_ske");
 
   if (err != CUDA_SUCCESS) fail_cuda(env,err,"cuModuleGetFunction jit compile");
 
