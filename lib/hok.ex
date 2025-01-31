@@ -707,7 +707,7 @@ def spawn_jit(k,t,b,l) do
   #IO.puts comp
   includes = JIT.get_includes()
   prog = [includes| comp] ++[kernel]
-  prog = ["#include \"erl_nif.h\"\n\n"| prog]
+
   prog = Enum.reduce(prog,"", fn x, y -> y<>x end)
 
   file = File.open!("c_src/Elixir.teste.cu", [:write])
