@@ -415,7 +415,7 @@ def gen_kernel(name,para,body) do
   "__global__\nvoid #{name}(#{para})\n{\n#{body}\n}"
 end
 def gen_kernel_jit(name,para,body) do
-  "extern "C" __global__\nvoid #{name}(#{para})\n{\n#{body}\n}"
+  "extern \"C\" __global__\nvoid #{name}(#{para})\n{\n#{body}\n}"
 end
 
 
