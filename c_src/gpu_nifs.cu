@@ -418,7 +418,7 @@ static ERL_NIF_TERM get_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
     
     int result_size = sizeof(int) * (nrow*ncol);
     int data_size = sizeof(int) * (nrow*ncol);
-    int *result_data = (int *) enif_make_new_binary(env, result_size, &result);
+    int *result_data = (int *) enif_make_new_binary(env, result_size*10, &result);
 
     int *ptr_matrix ;
     ptr_matrix = result_data;
