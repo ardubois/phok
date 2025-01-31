@@ -52,7 +52,7 @@ char* compile_to_ptx(const char* program_source) {
  };
     rv = nvrtcCompileProgram(prog, size_options, options);
     if(rv != NVRTC_SUCCESS) {
-        int log_size;
+        size_t log_size;
         rv = nvrtcGetProgramLogSize(prog, &log_size);
         if(rv != NVRTC_SUCCESS) fail("nvrtcGetProgramLogSize", rv);
 
