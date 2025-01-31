@@ -86,7 +86,7 @@ char* compile_to_ptx(const char* program_source) {
 
 const char program2[] = R"%%%(
 
-__device__
+__device__ a
 int anon_45cf36d0dd(int x)
 {
 return ((x + 1));
