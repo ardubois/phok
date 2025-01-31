@@ -68,7 +68,7 @@ char* compile_to_ptx(const char* program_source) {
     }
 
     // get ptx code
-    std::size_t ptx_size;
+    size_t ptx_size;
     rv = nvrtcGetPTXSize(prog, &ptx_size);
     if(rv != NVRTC_SUCCESS) fail("nvrtcGetPTXSize", rv);
     char* ptx_source = new char[ptx_size];
@@ -86,7 +86,7 @@ char* compile_to_ptx(const char* program_source) {
 
 const char program2[] = R"%%%(
 
-__device__ a
+__device__ 
 int anon_45cf36d0dd(int x)
 {
 return ((x + 1));
