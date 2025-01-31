@@ -52,12 +52,13 @@ char* compile_to_ptx(const char* program_source) {
  };
     rv = nvrtcCompileProgram(prog, size_options, options);
     if(rv != NVRTC_SUCCESS) {
-        std::size_t log_size;
+        int log_size;
         rv = nvrtcGetProgramLogSize(prog, &log_size);
         if(rv != NVRTC_SUCCESS) fail("nvrtcGetProgramLogSize", rv);
 
-        auto log = std::make_unique<char[]>(log_size);
-        rv = nvrtcGetProgramLog(prog, log.get());
+        //auto log = std::make_unique<char[]>(log_size);
+        char *log;
+        rv = nvrtcGetProgramLog(prog, log);
         if(rv != NVRTC_SUCCESS) fail("nvrtcGetProgramLog", rv);
         assert(log[log_size - 1] == '\0');
 
