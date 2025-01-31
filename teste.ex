@@ -52,7 +52,7 @@ func = Hok.hok fn (x) -> x + 1 end
 
 prev = System.monotonic_time()
 r = PMap.map(gtensor,func)
-r = Hok.get_gnx(r)
+#r = Hok.get_gnx(r)
 IO.inspect r
 next = System.monotonic_time()
 IO.puts "Hok\t\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
