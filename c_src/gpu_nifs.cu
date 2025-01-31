@@ -119,17 +119,13 @@ char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
         "--include-path=/usr/include/i386-linux-gnu/",
         "--include-path=/usr/local/include"
  };
- printf("log 1!!!!!!!\n");
+ 
     rv = nvrtcCompileProgram(prog, size_options, options);
-    printf("log 2!!!!!!!\n");
     if(rv != NVRTC_SUCCESS) {
         nvrtcResult erro_g = rv;
         size_t log_size;
-        printf("log 3!!!!!!!\n");
         rv = nvrtcGetProgramLogSize(prog, &log_size);
-        printf("log 4!!!!!!!\n");
         if(rv != NVRTC_SUCCESS) fail_nvrtc(env,rv,"nvrtcGetProgramLogSize");
-        printf("log 5!!!!!!!\n");
         //auto log = std::make_unique<char[]>(log_size);
         char log[log_size];
         rv = nvrtcGetProgramLog(prog, log);
@@ -140,7 +136,6 @@ char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
 
         fail_nvrtc(env,erro_g,"nvrtcCompileProgram");
     }
- // printf("log 3!!!!!!!\n");
     // get ptx code
     size_t ptx_size;
     rv = nvrtcGetPTXSize(prog, &ptx_size);
@@ -195,12 +190,12 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
     enif_get_int(env,tuple_threads[1],&t2);
     enif_get_int(env,tuple_threads[2],&t3);
 
-   printf("%s\n",code);
+   //printf("%s\n",code);
    //printf("Args: %d %d %d %d %d %d\n",b1,b2,b3,t1,t2,t3);
 
   char* ptx = compile_to_ptx(env,code);
    
-   // printf("%s\n",ptx);
+    printf("%s\n",ptx);
   
 
 }  
