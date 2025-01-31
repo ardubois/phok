@@ -361,7 +361,7 @@ static ERL_NIF_TERM get_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
   CUresult err;
 
  init_cuda(env);
-
+ printf("entrou get array\n");
   CUdeviceptr *array_res;
 
     if (!enif_get_resource(env, argv[0], ARRAY_TYPE, (void **) &array_res)) {
