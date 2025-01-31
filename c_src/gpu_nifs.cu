@@ -79,7 +79,7 @@ load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
 void fail_nvrtc(ErlNifEnv *env,nvrtcResult result, const char *obs){
         
         char message[200];
-        
+        printf("erro!!!!!!!!!\n");
         strcpy(message,"Error  NVRTC ");
         strcpy(message,obs);
         strcpy(message,": ");
