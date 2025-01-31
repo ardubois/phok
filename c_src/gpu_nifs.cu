@@ -180,10 +180,24 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
     CUmodule   module;
     CUfunction function;
     CUresult err;
+  
+  /////////// get name kernel
+
+    ERL_NIF_TERM e_name = argv[0];
+    unsigned int size_name;
+    if (!enif_get_list_length(env,e_name,&size_name)) {
+      return enif_make_badarg(env);
+    }
+
+   char name[size_name+1];
+   
+   enif_get_string(env,e_name,name,size_name+1,ERL_NIF_LATIN1);
+  
 
   
-  
-    ERL_NIF_TERM e_code = argv[0];
+  ///////////// get code
+
+    ERL_NIF_TERM e_code = argv[1];
     unsigned int size_code;
     if (!enif_get_list_length(env,e_code,&size_code)) {
       return enif_make_badarg(env);
@@ -193,11 +207,11 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
    
    enif_get_string(env,e_code,code,size_code+1,ERL_NIF_LATIN1);
   
-   if (!enif_get_tuple(env, argv[1], &arity, &tuple_blocks)) {
+   if (!enif_get_tuple(env, argv[2], &arity, &tuple_blocks)) {
       printf ("spawn: blocks argument is not a tuple");
     }
 
-    if (!enif_get_tuple(env, argv[2], &arity, &tuple_threads)) {
+    if (!enif_get_tuple(env, argv[3], &arity, &tuple_threads)) {
       printf ("spawn:threads argument is not a tuple");
     }
     int b1,b2,b3,t1,t2,t3;
@@ -1437,7 +1451,7 @@ static ERL_NIF_TERM spawn_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[
 }
 
 static ErlNifFunc nif_funcs[] = {
-    {"jit_compile_and_launch_nif",4,jit_compile_and_launch_nif},
+    {"jit_compile_and_launch_nif",5,jit_compile_and_launch_nif},
     {"new_gpu_array_nif", 3, new_gpu_array_nif},
     {"get_gpu_array_nif", 4, get_gpu_array_nif},
     {"create_gpu_array_nx_nif", 4, create_gpu_array_nx_nif},
