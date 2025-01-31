@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <dlfcn.h>
+#include <assert.h>
 
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -67,6 +68,93 @@ load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
   return 0;
 }
 
+
+///////////////////////
+/////////
+//////// BEGIN JIT COMPILATION KERNEL
+////////
+///////////////////
+
+
+void fail_nvrtc(ErlNifEnv *env,nvrtcResult result, const char *obs){
+        
+        char message[200];
+        
+        strcpy(message,"Error  NVRTC ");
+        strcpy(message,obs);
+        strcpy(message,": ");
+        strcat(message, nvrtcGetErrorString(result));
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+
+}
+
+
+char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
+    nvrtcResult rv;
+
+    // create nvrtc program
+    nvrtcProgram prog;
+    rv = nvrtcCreateProgram(
+        &prog,
+        program_source,
+        nullptr,
+        0,
+        nullptr,
+        nullptr
+    );
+   
+    if(rv != NVRTC_SUCCESS) fail_nvrtc(env,rv,"nvrtcCreateProgram");
+   
+    
+    
+    int size_options = 10;
+     const char* options[10] = {
+        "--include-path=/lib/erlang/usr/include/",
+        "--include-path=/usr/include/",
+        "--include-path=/usr/lib/",
+        "--include-path=/usr/include/x86_64-linux-gnu/",
+        "--include-path=/usr/include/c++/11",
+        "--include-path=/usr/include/x86_64-linux-gnu/c++/11",
+        "--include-path=/usr/include/c++/11/backward",
+        "--include-path=/usr/lib/gcc/x86_64-linux-gnu/11/include",
+        "--include-path=/usr/include/i386-linux-gnu/",
+        "--include-path=/usr/local/include"
+ };
+    rv = nvrtcCompileProgram(prog, size_options, options);
+    if(rv != NVRTC_SUCCESS) {
+        size_t log_size;
+        rv = nvrtcGetProgramLogSize(prog, &log_size);
+        if(rv != NVRTC_SUCCESS) fail_nvrtc(env,rv,"nvrtcGetProgramLogSize");
+
+        //auto log = std::make_unique<char[]>(log_size);
+        char log[10];
+        rv = nvrtcGetProgramLog(prog, log);
+        if(rv != NVRTC_SUCCESS) fail_nvrtc(env,rv,"nvrtcGetProgramLog");
+        assert(log[log_size - 1] == '\0');
+
+        printf("Compile error; log: %s\n", log);
+
+        fail_nvrtc(env,rv,"nvrtcCompileProgram");
+    }
+
+    // get ptx code
+    size_t ptx_size;
+    rv = nvrtcGetPTXSize(prog, &ptx_size);
+    if(rv != NVRTC_SUCCESS) fail_nvrtc(env,rv,"nvrtcGetPTXSize");
+    char* ptx_source = new char[ptx_size];
+    nvrtcGetPTX(prog, ptx_source);
+  
+   
+    if(rv != NVRTC_SUCCESS) fail_nvrtc(env,rv,"nvrtcGetPTX");
+    assert(ptx_source[ptx_size - 1] == '\0');
+
+    nvrtcDestroyProgram(&prog);
+
+    return ptx_source;
+}
+
+
+
 static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 
     ERL_NIF_TERM list;
@@ -103,11 +191,25 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
     enif_get_int(env,tuple_threads[1],&t2);
     enif_get_int(env,tuple_threads[2],&t3);
 
-   printf("%s\n",code);
-   printf("Args: %d %d %d %d %d %d\n",b1,b2,b3,t1,t2,t3);
+  // printf("%s\n",code);
+   //printf("Args: %d %d %d %d %d %d\n",b1,b2,b3,t1,t2,t3);
+
+   char* ptx = compile_to_ptx(env,code);
+   
+    printf("%s\n",ptx);
   
 
 }  
+
+
+///////////////////////
+/////////
+////////  JIT COMPILATION KERNEL
+////////
+///////////////////
+
+
+
 
 static ERL_NIF_TERM get_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   int nrow;
