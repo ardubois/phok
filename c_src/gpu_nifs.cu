@@ -78,7 +78,7 @@ load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
 
 void fail_nvrtc(ErlNifEnv *env,nvrtcResult result, const char *obs){
         
-        char message[200];
+        char message[1000];
         printf("erro!!!!!!!!!\n");
         strcpy(message,"Error  NVRTC ");
         strcpy(message,obs);
@@ -92,6 +92,7 @@ void fail_nvrtc(ErlNifEnv *env,nvrtcResult result, const char *obs){
 char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
     nvrtcResult rv;
 
+   printf("log 1!!!!!!!\n");
     // create nvrtc program
     nvrtcProgram prog;
     rv = nvrtcCreateProgram(
@@ -102,10 +103,10 @@ char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
         nullptr,
         nullptr
     );
-   
+    printf("log 2!!!!!!!\n");
     if(rv != NVRTC_SUCCESS) fail_nvrtc(env,rv,"nvrtcCreateProgram");
    
-    
+    printf("log 3!!!!!!!\n");
     
     int size_options = 10;
      const char* options[10] = {
