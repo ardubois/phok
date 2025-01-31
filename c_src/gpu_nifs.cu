@@ -285,7 +285,7 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
     {
       printf("arg int\n") ;
        int iarg;
-       enif_get_int(env, head_args, &iarg);
+      if(! enif_get_int(env, head_args, &iarg))
        { printf("error getting int arg\n");
           return enif_make_badarg(env);
        }
