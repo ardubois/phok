@@ -721,7 +721,7 @@ def spawn_jit(k,t,b,l) do
 
   args = process_args_no_fun(l)
 
-  jit_compile_and_launch_nif(Kernel.to_charlist(kernel_name,Kernel.to_charlist(prog),t,b,args)
+  jit_compile_and_launch_nif(Kernel.to_charlist(kernel_name),Kernel.to_charlist(prog),t,b,args)
   #IO.inspect args
 
   #IO.puts out
