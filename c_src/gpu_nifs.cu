@@ -123,7 +123,7 @@ char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
     rv = nvrtcCompileProgram(prog, size_options, options);
     printf("log 2!!!!!!!\n");
     if(rv != NVRTC_SUCCESS) {
-        int erro = rv;
+        nvrtcResult erro_g = rv;
         size_t log_size;
         printf("log 3!!!!!!!\n");
         rv = nvrtcGetProgramLogSize(prog, &log_size);
@@ -138,7 +138,7 @@ char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
 
         printf("Compile error; log: %s\n", log);
 
-        fail_nvrtc(env,erro,"nvrtcCompileProgram");
+        fail_nvrtc(env,erro_g,"nvrtcCompileProgram");
     }
  // printf("log 3!!!!!!!\n");
     // get ptx code
