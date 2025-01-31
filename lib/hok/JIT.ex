@@ -93,7 +93,7 @@ def compile_kernel({:defk,_,[header,[body]]},inf_types,subs) do
                     end end)
 
    cuda_body = Hok.CudaBackend.gen_cuda_jit(body,inf_types,param_vars,"module",subs)
-   k = Hok.CudaBackend.gen_kernel(fname,param_list,cuda_body)
+   k = Hok.CudaBackend.gen_kernel_jit(fname,param_list,cuda_body)
    #accessfunc = Hok.CudaBackend.gen_kernel_call(fname,length(types_para),Enum.reverse(types_para))
    "\n" <> k <> "\n\n" # <> accessfunc
 end
