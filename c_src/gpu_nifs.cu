@@ -75,11 +75,24 @@ load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
 ////////
 ///////////////////
 
+void fail_cuda(ErlNifEnv *env, CUresult result, const char *obs){
+        
+       char message[1000];
+        const char *error;
+        strcpy(message,"Error  CUDA ");
+        strcpy(message,obs);
+        strcpy(message,": ");
+        cuGetErrorString(result, &error);
+        strcat(message, error);
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+
+}
+
 
 void fail_nvrtc(ErlNifEnv *env,nvrtcResult result, const char *obs){
         
         char message[1000];
-        printf("erro!!!!!!!!!\n");
+        
         strcpy(message,"Error  NVRTC ");
         strcpy(message,obs);
         strcpy(message,": ");
@@ -164,6 +177,10 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
     const ERL_NIF_TERM *tuple_threads;
     int arity;
 
+    CUmodule   module;
+    CUfunction function;
+    CUresult err;
+  
     ERL_NIF_TERM e_code = argv[0];
     unsigned int size_code;
     if (!enif_get_list_length(env,e_code,&size_code)) {
@@ -195,8 +212,15 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
 
   char* ptx = compile_to_ptx(env,code);
    
-    printf("%s\n",ptx);
-  
+  err = cuModuleLoadDataEx(&module,  ptx, 0, 0, 0);
+  if (err != CUDA_SUCCESS) fail_cuda(env,err,"cuModuleLoadData jit compile");
+
+ 
+  // And here is how you use your compiled PTX
+ 
+  err = cuModuleGetFunction(&function, module, "map_ske");
+
+  if (err != CUDA_SUCCESS) fail_cuda(env,err,"cuModuleGetFunction jit compile");
 
 }  
 
