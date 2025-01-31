@@ -181,7 +181,7 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
     CUfunction function;
     CUresult err;
 
-    init_cuda(env);
+  
   
     ERL_NIF_TERM e_code = argv[0];
     unsigned int size_code;
@@ -214,13 +214,16 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
 
   char* ptx = compile_to_ptx(env,code);
    printf("%s",ptx);
+
+  init_cuda(env);
+
   err = cuModuleLoadDataEx(&module,  ptx, 0, 0, 0);
   if (err != CUDA_SUCCESS) fail_cuda(env,err,"cuModuleLoadData jit compile");
 
  
   // And here is how you use your compiled PTX
  
-  //err = cuModuleGetFunction(&function, module, "map_ske");
+  err = cuModuleGetFunction(&function, module, "map_ske");
 
   if (err != CUDA_SUCCESS) fail_cuda(env,err,"cuModuleGetFunction jit compile");
 
