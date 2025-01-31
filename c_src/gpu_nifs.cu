@@ -189,9 +189,9 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
       return enif_make_badarg(env);
     }
 
-   char name[size_name+1];
+   char kernel_name[size_name+1];
    
-   enif_get_string(env,e_name,name,size_name+1,ERL_NIF_LATIN1);
+   enif_get_string(env,e_name,kernel_name,size_name+1,ERL_NIF_LATIN1);
   
 
   
@@ -240,7 +240,7 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
  printf("after compile\n");
   // And here is how you use your compiled PTX
  
-  err = cuModuleGetFunction(&function, module, "map_ske");
+  err = cuModuleGetFunction(&function, module, kernel_name);
   printf("after load\n");
   if (err != CUDA_SUCCESS) fail_cuda(env,err,"cuModuleGetFunction jit compile");
 
