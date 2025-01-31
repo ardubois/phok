@@ -721,10 +721,7 @@ def spawn_jit(k,t,b,l) do
 
   args = process_args_no_fun(l)
 
-  kernel = JIT.load_kernel(k)
-
-  spawn_nif(kernel,t,b,args)
-
+  jit_compile_and_launch_nif(Kernel.to_charlist(prog),t,b,args)
   #IO.inspect args
 
   #IO.puts out
@@ -803,5 +800,7 @@ def spawn_nif(_k,_t,_b,_l) do
   raise "NIF spawn_nif/1 not implemented"
 end
 
-
+def jit_compile_and_launch_nif(_k,_t,_b,_l) do
+  raise "NIF spawn_nif/1 not implemented"
+end
 end
