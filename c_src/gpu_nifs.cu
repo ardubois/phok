@@ -124,11 +124,13 @@ char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
     printf("log 2!!!!!!!\n");
     if(rv != NVRTC_SUCCESS) {
         size_t log_size;
+        printf("log 3!!!!!!!\n");
         rv = nvrtcGetProgramLogSize(prog, &log_size);
+        printf("log 4!!!!!!!\n");
         if(rv != NVRTC_SUCCESS) fail_nvrtc(env,rv,"nvrtcGetProgramLogSize");
-
+        printf("log 5!!!!!!!\n");
         //auto log = std::make_unique<char[]>(log_size);
-        char log[10];
+        char log[log_size];
         rv = nvrtcGetProgramLog(prog, log);
         if(rv != NVRTC_SUCCESS) fail_nvrtc(env,rv,"nvrtcGetProgramLog");
         assert(log[log_size - 1] == '\0');
@@ -137,7 +139,7 @@ char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
 
         fail_nvrtc(env,rv,"nvrtcCompileProgram");
     }
-  printf("log 3!!!!!!!\n");
+ // printf("log 3!!!!!!!\n");
     // get ptx code
     size_t ptx_size;
     rv = nvrtcGetPTXSize(prog, &ptx_size);
