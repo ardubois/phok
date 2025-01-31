@@ -196,7 +196,7 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
 
   // char* ptx = compile_to_ptx(env,code);
    
-    printf("%s\n",ptx);
+   // printf("%s\n",ptx);
   
 
 }  
