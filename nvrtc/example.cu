@@ -18,6 +18,7 @@
 }
 
 
+
 char* compile_to_ptx(const char* program_source) {
     nvrtcResult rv;
 
@@ -36,7 +37,8 @@ char* compile_to_ptx(const char* program_source) {
     // compile nvrtc program
     
     //options.push_back("-default-device");
-    std::vector<const char*> options = {
+    int size_options = 10;
+     const char* options[10] = {
         "--include-path=/lib/erlang/usr/include/",
         "--include-path=/usr/include/",
         "--include-path=/usr/lib/",
@@ -48,7 +50,7 @@ char* compile_to_ptx(const char* program_source) {
         "--include-path=/usr/include/i386-linux-gnu/",
         "--include-path=/usr/local/include"
  };
-    rv = nvrtcCompileProgram(prog, options.size(), options.data());
+    rv = nvrtcCompileProgram(prog, size_options, options);
     if(rv != NVRTC_SUCCESS) {
         std::size_t log_size;
         rv = nvrtcGetProgramLogSize(prog, &log_size);
