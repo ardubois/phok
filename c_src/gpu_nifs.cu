@@ -191,10 +191,10 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
     enif_get_int(env,tuple_threads[1],&t2);
     enif_get_int(env,tuple_threads[2],&t3);
 
-  // printf("%s\n",code);
+   printf("%s\n",code);
    //printf("Args: %d %d %d %d %d %d\n",b1,b2,b3,t1,t2,t3);
 
-   char* ptx = compile_to_ptx(env,code);
+  // char* ptx = compile_to_ptx(env,code);
    
     printf("%s\n",ptx);
   
