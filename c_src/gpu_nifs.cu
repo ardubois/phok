@@ -92,7 +92,7 @@ void fail_nvrtc(ErlNifEnv *env,nvrtcResult result, const char *obs){
 char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
     nvrtcResult rv;
 
-   printf("log 1!!!!!!!\n");
+   
     // create nvrtc program
     nvrtcProgram prog;
     rv = nvrtcCreateProgram(
@@ -103,10 +103,8 @@ char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
         nullptr,
         nullptr
     );
-    printf("log 2!!!!!!!\n");
     if(rv != NVRTC_SUCCESS) fail_nvrtc(env,rv,"nvrtcCreateProgram");
    
-    printf("log 3!!!!!!!\n");
     
     int size_options = 10;
      const char* options[10] = {
@@ -121,7 +119,9 @@ char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
         "--include-path=/usr/include/i386-linux-gnu/",
         "--include-path=/usr/local/include"
  };
+ printf("log 1!!!!!!!\n");
     rv = nvrtcCompileProgram(prog, size_options, options);
+    printf("log 2!!!!!!!\n");
     if(rv != NVRTC_SUCCESS) {
         size_t log_size;
         rv = nvrtcGetProgramLogSize(prog, &log_size);
@@ -137,7 +137,7 @@ char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
 
         fail_nvrtc(env,rv,"nvrtcCompileProgram");
     }
-
+  printf("log 3!!!!!!!\n");
     // get ptx code
     size_t ptx_size;
     rv = nvrtcGetPTXSize(prog, &ptx_size);
