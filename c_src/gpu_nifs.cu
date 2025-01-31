@@ -230,6 +230,7 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
   printf("after load\n");
   if (err != CUDA_SUCCESS) fail_cuda(env,err,"cuModuleGetFunction jit compile");
 
+   return enif_make_int(env, 0);
 }  
 
 
