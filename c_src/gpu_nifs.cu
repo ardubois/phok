@@ -216,7 +216,7 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
    printf("%s",ptx);
 
   init_cuda(env);
-
+  device =0;
   err = cuCtxCreate(&context, 0, device);
   err = cuModuleLoadDataEx(&module,  ptx, 0, 0, 0);
   if (err != CUDA_SUCCESS) fail_cuda(env,err,"cuModuleLoadData jit compile");
