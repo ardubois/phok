@@ -54,6 +54,7 @@ func = Hok.hok fn (x) -> x + 1 end
 prev = System.monotonic_time()
 #r = PMap.map(gtensor,func)
 r = Hok.new_gnx(1,4,{:s,32})
+IO.inspect r
 r = Hok.get_gnx(r)
 IO.inspect r
 next = System.monotonic_time()
