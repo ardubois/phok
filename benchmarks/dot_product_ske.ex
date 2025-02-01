@@ -1,4 +1,5 @@
 require Hok
+Nx.default_backend(EXLA.Backend)
 
 Hok.defmodule_jit DP do
 include CAS
