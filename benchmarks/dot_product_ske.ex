@@ -82,22 +82,12 @@ end
 
 n = String.to_integer(arg)
 
-#n = 10000000
-#list = [Enum.to_list(1..n)]
-#list = [DP.replicate(n,1)]
-#vet1 = Matrex.new(list)
-#vet2 = Matrex.new(list)
 
-#{vet1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
-#{vet2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
-
-vet1 = Nx.tensor([[1,2,3,4]],type: {:f, 32})
-vet2 = Nx.tensor([[1,1,1,1]],type: {:f, 32})
+{vet1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
+{vet2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
 
 prev = System.monotonic_time()
 
-#ref1= Hok.new_gmatrex(vet1)
-#ref2 = Hok.new_gmatrex(vet2)
 
 ref1 = Hok.new_gnx(vet1)
 
