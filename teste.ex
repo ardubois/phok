@@ -52,7 +52,7 @@ func = Hok.hok fn (x) -> x + 1 end
 #PMap.map(gtensor,&PMap.inc/1)
 
 prev = System.monotonic_time()
-r = PMap.map(gtensor,func)
+#r = PMap.map(gtensor,func)
 r = Hok.get_gnx(gtensor)
 IO.inspect r
 next = System.monotonic_time()
