@@ -10,8 +10,8 @@ include CAS
   end
   def map2(t1,t2,func) do
 
-    {l,c} = Hok.get_shape_gnx(v1)
-    type = Hok.get_type_gnx(v1)
+    {l,c} = Hok.get_shape_gnx(t1)
+    type = Hok.get_type_gnx(t2)
 
      result_gpu = ref2 = Hok.new_gnx(l,c, type)
 
@@ -23,17 +23,17 @@ include CAS
 
       result_gpu
   end
-  def reduce(ref4,  f) do
+  def reduce(ref,  f) do
 
-     {l,c} = Hok.get_shape_gnx(v1)
-     type = Hok.get_type_gnx(v1)
+     {l,c} = Hok.get_shape_gnx(ref)
+     type = Hok.get_type_gnx(ref)
 
-      result_gpu = ref2 = Hok.new_gnx(l,c, type)
+      result_gpu  = Hok.new_gnx(l,c, type)
 
       threadsPerBlock = 256
       blocksPerGrid = div(size + threadsPerBlock - 1, threadsPerBlock)
       numberOfBlocks = blocksPerGrid
-      Hok.spawn_jit(&DP.reduce_kernel/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref4, result_gpu, f, size])
+      Hok.spawn_jit(&DP.reduce_kernel/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref, result_gpu, f, size])
       result_gpu
   end
   defk reduce_kernel(a, ref4, f,n) do
