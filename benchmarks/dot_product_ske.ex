@@ -1,6 +1,6 @@
 require Hok
 Nx.default_backend(EXLA.Backend)
-
+import Nx
 Hok.defmodule_jit DP do
 include CAS
   defk map_2kernel(a1,a2,a3,size,f) do
