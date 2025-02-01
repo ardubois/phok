@@ -71,7 +71,7 @@ dim = m
 
 values_per_pixel = 4
 
-result_gpu = Hok.new_gnx(size*size,4,{:s,32})
+result_gpu = Hok.new_gnx(dim*dim,4,{:s,32})
 
 prev = System.monotonic_time()
 
