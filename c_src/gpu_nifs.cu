@@ -724,7 +724,7 @@ static ERL_NIF_TERM new_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
 
      //END CUDA CALL
 
-
+  printf("pointer %p",dev_array);
     
   } else if (strcmp(type_name, "double") == 0)
   {
