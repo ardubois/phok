@@ -91,6 +91,9 @@ n = String.to_integer(arg)
 vet1 = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
 vet2 = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
 
+IO.puts "INSPECT"
+IO.inspect vet1
+
 prev = System.monotonic_time()
 
 #ref1= Hok.new_gmatrex(vet1)
