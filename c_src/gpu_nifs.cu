@@ -441,6 +441,7 @@ static ERL_NIF_TERM get_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
     
     //// MAKE CUDA CALL
       printf("cuda get\n");
+      printf("pointer %p\n",dev_array);
     err=  cuMemcpyDtoH(ptr_matrix, dev_array, data_size) ;
     
     if(err != CUDA_SUCCESS)  
