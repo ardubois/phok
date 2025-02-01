@@ -88,8 +88,8 @@ n = String.to_integer(arg)
 #vet1 = Matrex.new(list)
 #vet2 = Matrex.new(list)
 
-vet1 = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
-vet2 = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
+{vet1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
+{vet2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
 
 IO.puts "INSPECT"
 IO.inspect vet1
