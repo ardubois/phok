@@ -33,8 +33,8 @@ Hok.defmodule_jit PMap do
 
 
     Hok.spawn_jit(&PMap.map_ske/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[v1,result_gpu,size, f])
-    #result_gpu
-    v1
+    result_gpu
+
   end
 
 end
@@ -53,7 +53,7 @@ func = Hok.hok fn (x) -> x + 1 end
 
 prev = System.monotonic_time()
 r = PMap.map(gtensor,func)
-r = Hok.get_gnx(r)
+r = Hok.get_gnx(gtensor)
 IO.inspect r
 next = System.monotonic_time()
 IO.puts "Hok\t\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
