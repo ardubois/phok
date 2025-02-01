@@ -20,8 +20,8 @@ def map2xy2D1p(arr1,arr2,par,resp,size,f) do
 end
 def comp2xy2D1p(arr1,arr2,par,size1,size2,f) do
 
-    type = Hok.get_type_gnx(arr1)
-    result_gpu = Hok.new_gnx(size1,size2,type)
+
+    result_gpu = Hok.new_gnx(size1,size2,Nx.type(arr1))
     arr1_gpu = Hok.new_gnx(arr1)
     arr2_gpu = Hok.new_gnx(arr2)
 
