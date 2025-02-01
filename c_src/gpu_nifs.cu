@@ -343,7 +343,7 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
    int ptr_matrix[1000];
    CUdeviceptr dev_array = (CUdeviceptr) args[1];
    err=  cuMemcpyDtoH(ptr_matrix, dev_array, 3*sizeof(int)) ;
-    
+    printf("pointer %p\n",dev_array);
     if(err != CUDA_SUCCESS)  
       { char message[200];printf("its ok\n");
         const char *error;
@@ -724,7 +724,7 @@ static ERL_NIF_TERM new_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
 
      //END CUDA CALL
 
-  printf("pointer %p",dev_array);
+  printf("pointer %p\n",dev_array);
     
   } else if (strcmp(type_name, "double") == 0)
   {
