@@ -56,10 +56,10 @@ gtensor2
     |> Hok.get_gnx
     |> IO.inspect
 
-#gtensor3
-#    |> PMap.map(func)
-#    |> Hok.get_gnx
-#    |> IO.inspect
+gtensor3
+    |> PMap.map(func)
+    |> Hok.get_gnx
+    |> IO.inspect
 
 next = System.monotonic_time()
 IO.puts "Hok\t\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
