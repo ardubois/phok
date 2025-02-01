@@ -5,7 +5,6 @@ require Hok
     if(id < size) do
       a2[id] = f(a1[id])
     end
-  end
   def map(v1, f) do
     {l,c} = Hok.get_shape_gnx(v1)
     type = Hok.get_type_gnx(v1)
