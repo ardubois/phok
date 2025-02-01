@@ -51,10 +51,10 @@ gtensor1
     |> Hok.get_gnx
     |> IO.inspect
 
-#gtensor2
-#    |> PMap.map(func)
-#    |> Hok.get_gnx
-#    |> IO.inspect
+gtensor2
+    |> PMap.map(func)
+    |> Hok.get_gnx
+    |> IO.inspect
 
 #gtensor3
 #    |> PMap.map(func)
