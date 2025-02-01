@@ -1,4 +1,5 @@
 require Hok
+
 Hok.defmodule_jit PMap do
   defk map_ske(a1,a2,size,f) do
     var id int = blockIdx.x * blockDim.x + threadIdx.x
