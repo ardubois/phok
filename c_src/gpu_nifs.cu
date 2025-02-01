@@ -233,6 +233,14 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
       return enif_make_badarg(env);
   }
 
+  CUdeviceptr arrays[size_args];
+  float floats[size_args];
+  int ints[size_args];
+  double doubles[size_args];
+  int arrays_ptr=0;
+  int floats_ptr=0;
+  int doubles_ptr=0;
+  int ints_ptr=0;
   // printf("%s\n",code);
    //printf("Args: %d %d %d %d %d %d\n",b1,b2,b3,t1,t2,t3);
 
@@ -289,8 +297,9 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
        { printf("error getting int arg\n");
           return enif_make_badarg(env);
        }
-
-       args[i] = (void*)  &iarg;
+       ints[ints_ptr] = iarg;
+       args[i] = (void*)  &ints[ints_ptr];
+       ints_ptr++;
 
 
     } else if (strcmp(type_name, "tint") == 0)
@@ -298,9 +307,10 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
       printf("arg tint\n") ;
       CUdeviceptr *array_res;
       enif_get_resource(env, head_args, ARRAY_TYPE, (void **) &array_res);
-      CUdeviceptr aarg = *array_res;
-      printf("pointer %p\n",aarg);
-      args[i] = (void*)  &aarg;
+      arrays[arrays_ptr] = *array_res;
+      printf("pointer %p\n",arrays[arrays_ptr]);
+      args[i] = (void*)  &arrays[arrays_ptr];
+      arrays_ptr++;
       printf("blah %p\n",args[i]);
     } else if (strcmp(type_name, "tfloat") == 0)
     {
