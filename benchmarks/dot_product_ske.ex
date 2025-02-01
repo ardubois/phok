@@ -91,8 +91,8 @@ n = String.to_integer(arg)
 #{vet1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
 #{vet2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
 
-vet1 = Nx.tensor([[1,2,3,4]],type: {:f, 32})
-vet2 = Nx.tensor([[1,1,1,1]],type: {:f, 32})
+vet1 = Nx.tensor([[1,2,3,4]],type: {:s, 32})
+vet2 = Nx.tensor([[1,1,1,1]],type: {:s, 32})
 
 prev = System.monotonic_time()
 
