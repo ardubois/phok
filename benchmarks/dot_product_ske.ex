@@ -14,7 +14,7 @@ include CAS
     {l,c} = Hok.get_shape_gnx(t1)
     type = Hok.get_type_gnx(t2)
      size = l*c
-     result_gpu = ref2 = Hok.new_gnx(l,c, type)
+     result_gpu = Hok.new_gnx(l,c, type)
 
       threadsPerBlock = 256;
       numberOfBlocks = div(size + threadsPerBlock - 1, threadsPerBlock)
@@ -84,9 +84,11 @@ end
 n = String.to_integer(arg)
 
 
-{vet1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
-{vet2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
+#{vet1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
+#{vet2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
 
+vet1 = Nx.iota({1,n}, type: :f32)
+vet2 = Nx.iota({1,n}, type: :f32)
 prev = System.monotonic_time()
 
 
