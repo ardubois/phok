@@ -290,6 +290,9 @@ def new_gnx_fake ((%Nx.Tensor{data: _data, type: type, shape: shape, names: name
   {:nx, type, shape, name , :ref}
 end
 
+def null(a) do
+  a
+end
 def new_gpu_array_nif(_l,_c,_type) do
   raise "NIF new_gpu_array_nif/4 not implemented"
 end

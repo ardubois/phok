@@ -108,4 +108,7 @@ IO.inspect result
 
 
 next = System.monotonic_time()
+
+Hok.null(vet1)
+Hok.null(vet2)
 IO.puts "Hok\t#{n}\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
