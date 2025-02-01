@@ -104,16 +104,15 @@ ref1 = Hok.new_gnx(vet1)
 ref2 = Hok.new_gnx(vet2)
 
 
-result_gpu = ref1
+result = ref1
     |> DP.map2(ref2, Hok.hok fn (a,b) -> a * b end)
     |> DP.reduce(Hok.hok fn (a,b) -> a + b end)
+    |> Hok.get_gnx
 
 
+IO.inspect result
 
-result = Hok.get_gmatrex(result_gpu)
 
 
 next = System.monotonic_time()
 IO.puts "Hok\t#{n}\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
-
-IO.inspect result
