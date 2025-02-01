@@ -28,7 +28,7 @@ include CAS
      {l,c} = Hok.get_shape_gnx(ref)
      type = Hok.get_type_gnx(ref)
      size = l*c
-      result_gpu  = Hok.new_gnx(Nx.tensor([0] ,type))
+      result_gpu  = Hok.new_gnx(Nx.tensor([0] , :type type))
 
       threadsPerBlock = 256
       blocksPerGrid = div(size + threadsPerBlock - 1, threadsPerBlock)
