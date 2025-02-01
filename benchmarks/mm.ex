@@ -39,8 +39,8 @@ m = String.to_integer(arg)
 #vet1 = Nx.iota({m,m}, type: :f32)
 #vet2 = Nx.iota({m,m}, type: :f32)
 
-{mat1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {m, m}, type: :f32)
-{mat2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {m, m}, type: :f32)
+{mat1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {m, m}, type: :f64)
+{mat2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {m, m}, type: :f64)
 
 prev = System.monotonic_time()
 
@@ -58,6 +58,8 @@ next = System.monotonic_time()
 
 IO.puts "Hok\t#{m}\t#{System.convert_time_unit(next-prev,:native,:millisecond)} "
 
+Hok.null(mat1)
+Hok.null(mat2)
 #m1 = Matrex.reshape(mat1,m,m)
 #m2 = Matrex.reshape(mat2,m,m)
 #res_cpu = Matrex.dot(m1,m2)
