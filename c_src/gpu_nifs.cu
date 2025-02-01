@@ -345,7 +345,7 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
    CUdeviceptr *dev_array = (CUdeviceptr*) args[1];
    //err=  cuMemcpyDtoH(ptr_matrix, dev_array, 3*sizeof(int)) ;
     printf("pointer %p\n",*dev_array);
-    printf("blah %p\n",args[1]);
+    printf("blah %p\n",args[0]);
     if(err != CUDA_SUCCESS)  
       { char message[200];printf("its ok\n");
         const char *error;
