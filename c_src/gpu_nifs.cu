@@ -299,7 +299,7 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
       CUdeviceptr *array_res;
       enif_get_resource(env, head_args, ARRAY_TYPE, (void **) &array_res);
       CUdeviceptr aarg = *array_res;
-      
+      printf("pointer %p\n",aarg);
       args[i] = (void*)  &aarg;
 
     } else if (strcmp(type_name, "tfloat") == 0)
