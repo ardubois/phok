@@ -129,7 +129,7 @@ for (int i = 1; i <= m*m; ++i) {
    //struct timespec begin, end;
    //clock_gettime(CLOCK_MONOTONIC, &begin);
 
-   double time;
+   float time;
     cudaEvent_t start, stop;   
      cudaEventCreate(&start) ;
     cudaEventCreate(&stop) ;
