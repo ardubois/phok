@@ -75,7 +75,7 @@ result_gpu = Hok.new_gnx(dim*dim,4,{:s,32})
 
 prev = System.monotonic_time()
 
-d_image = Julia.mapgen2D_step_xy_1para_noret(4,dim,dim, &Julia.julia_function/4)
+d_image = Julia.mapgen2D_step_xy_1para_noret(result_gpu,4,dim,dim, &Julia.julia_function/4)
 
 image = Hok.get_gnx(d_image)
 
