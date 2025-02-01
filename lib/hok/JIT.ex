@@ -85,12 +85,12 @@ def compile_kernel({:defk,_,[header,[body]]},inf_types,subs) do
   param_vars = para
    |>  Enum.map(fn {p, _, _}-> p end)
 
-  types_para = para
-   |>  Enum.map(fn {p, _, _}-> Map.get(inf_types,p) end)
-   |> Enum.filter(fn p -> case p do
-                             {_,_} -> false
-                              _ -> true
-                    end end)
+  #types_para = para
+  # |>  Enum.map(fn {p, _, _}-> Map.get(inf_types,p) end)
+  # |> Enum.filter(fn p -> case p do
+  #                           {_,_} -> false
+  #                            _ -> true
+  #                  end end)
 
    cuda_body = Hok.CudaBackend.gen_cuda_jit(body,inf_types,param_vars,"module",subs)
    k = Hok.CudaBackend.gen_kernel_jit(fname,param_list,cuda_body)
