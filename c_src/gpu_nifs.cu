@@ -46,8 +46,8 @@ ErlNifResourceType *PINNED_ARRAY;
 
 void
 dev_array_destructor(ErlNifEnv *env, void *res) {
-  float **dev_array = (float**) res;
-  cudaFree(*dev_array);
+  CUdeviceptr *dev_array = (CUdeviceptr*) res;
+  cuMemFree(*dev_array);
 }
 
 void
@@ -337,6 +337,8 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
                                     0, 0, args, 0) ;
   
   if (err != CUDA_SUCCESS) fail_cuda(env,err,"cuLaunchKernel jit compile");
+   
+   cuCtxSynchronize();
 
    return enif_make_int(env, 0);
 }  
@@ -400,9 +402,9 @@ static ERL_NIF_TERM get_gpu_array_nif(ErlNifEnv *env, int argc, const ERL_NIF_TE
     float *ptr_matrix ;
     ptr_matrix = result_data;
     
-    int m[1000];
+    
     //// MAKE CUDA CALL
-    err = cuMemcpyDtoH(m, dev_array, data_size) ;
+    err = cuMemcpyDtoH(ptr_matrix, dev_array, data_size) ;
   
     if(err != CUDA_SUCCESS)  
       { char message[200]; 
