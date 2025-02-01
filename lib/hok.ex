@@ -260,7 +260,7 @@ def new_gnx(l,c,type) do
     x -> raise "new_gmatrex: type #{x} not suported"
  end
 
- {:nx, type, {l,c}, [nil] , ref}
+ {:nx, type, {l,c}, [nil,nil] , ref}
 end
 
 def get_gnx({:nx, type, shape, name , ref}) do
