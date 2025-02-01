@@ -57,12 +57,11 @@ Hok.defmodule_jit Julia do
 
 
 
-    Hok.spawn(&Julia.mapgen2D_xy_1para_noret_ker/4,{size,size,1},{1,1,1},[result_gpu,arg1,size,f])
+    Hok.spawn_jit(&Julia.mapgen2D_xy_1para_noret_ker/4,{size,size,1},{1,1,1},[result_gpu,arg1,size,f])
     result_gpu
   end
 end
 
-Hok.include [Julia]
 
 [arg] = System.argv()
 m = String.to_integer(arg)
