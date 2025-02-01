@@ -340,6 +340,19 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
    
    cuCtxSynchronize();
 
+   int ptr_matrix[1000];
+   CUdeviceptr* dev_array = (CUdeviceptr*) args[1];
+   err=  cuMemcpyDtoH(ptr_matrix, *dev_array, 3*sizeof(int)) ;
+    
+    if(err != CUDA_SUCCESS)  
+      { char message[200];
+        const char *error;
+        cuGetErrorString(err, &error);
+        strcpy(message,"Error get_gpu_array_nif: ");
+        strcat(message, error);
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+    }
+
    return enif_make_int(env, 0);
 }  
 
