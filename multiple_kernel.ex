@@ -34,11 +34,11 @@ end
 #raise "hell"
 
 tensor1 = Nx.tensor([[1,2,3,4]],type: {:s, 32})
-tensor2 = Nx.tensor([[1,2,3,4]],type: {:f, 32})
-tensor3 = Nx.tensor([[1,2,3,4]],type: {:f, 64})
+#tensor2 = Nx.tensor([[1,2,3,4]],type: {:f, 32})
+#tensor3 = Nx.tensor([[1,2,3,4]],type: {:f, 64})
 gtensor1 = Hok.new_gnx(tensor1)
-gtensor2 = Hok.new_gnx(tensor2)
-gtensor3 = Hok.new_gnx(tensor3)
+#gtensor2 = Hok.new_gnx(tensor2)
+#gtensor3 = Hok.new_gnx(tensor3)
 
 func = Hok.hok fn (x) -> x + 1 end
 
@@ -51,15 +51,15 @@ gtensor1
     |> Hok.get_gnx
     |> IO.inspect
 
-gtensor2
-    |> PMap.map(func)
-    |> Hok.get_gnx
-    |> IO.inspect
+#gtensor2
+#    |> PMap.map(func)
+#    |> Hok.get_gnx
+#    |> IO.inspect
 
-gtensor3
-    |> PMap.map(func)
-    |> Hok.get_gnx
-    |> IO.inspect
+#gtensor3
+#    |> PMap.map(func)
+#    |> Hok.get_gnx
+#    |> IO.inspect
 
 next = System.monotonic_time()
 IO.puts "Hok\t\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
