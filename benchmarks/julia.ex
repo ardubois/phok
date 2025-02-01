@@ -47,11 +47,11 @@ Hok.defmodule_jit Julia do
 
 
   defk mapgen2D_xy_1para_noret_ker(resp,arg1,size,f)do
-    var x int= blockIdx.x * blockDim.x + threadIdx.x
-    var y int  = blockIdx.y * blockDim.y + threadIdx.y
+    x = blockIdx.x * blockDim.x + threadIdx.x
+    y = blockIdx.y * blockDim.y + threadIdx.y
 
     if(x < size && y < size) do
-      var v int=f(resp,x,y,arg1)
+      v=f(resp,x,y,arg1)
     end
   end
   def mapgen2D_step_xy_1para_noret(result_gpu,step, arg1, size,f) do
@@ -75,13 +75,11 @@ result_gpu = Hok.new_gnx(dim*dim,4,{:s,32})
 
 prev = System.monotonic_time()
 
-d_image = Julia.mapgen2D_step_xy_1para_noret(result_gpu,4,dim,dim, &Julia.julia_function/4)
+image = Julia.mapgen2D_step_xy_1para_noret(result_gpu,4,dim,dim, &Julia.julia_function/4)
+  |> Hok.get_gnx
 
-image = Hok.get_gnx(d_image)
-
-#image = Hok.get_gmatrex(ref)
 next = System.monotonic_time()
 
 IO.puts "Hok\t#{dim}\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
-BMP.gen_bmp('julia2gpotion.bmp',dim,image)
+#BMP.gen_bmp('julia2gpotion.bmp',dim,image)
