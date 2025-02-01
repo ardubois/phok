@@ -83,4 +83,4 @@ next = System.monotonic_time()
 
 IO.puts "Hok\t#{dim}\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
-#BMP.gen_bmp('julia2gpotion.bmp',dim,image)
+BMP.gen_bmp('julia2gpotion.bmp',dim,image)

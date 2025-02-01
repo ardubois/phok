@@ -78,7 +78,7 @@ void genBpm (uint32_t height, uint32_t width, uint8_t *pixelbuffer, char *file_n
 
 static ERL_NIF_TERM gen_bmp_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   ErlNifBinary  matrix_el;
-  float         *matrix;
+  int        *matrix;
   int dim;
   
   ///GET FILE NAME
@@ -101,9 +101,9 @@ static ERL_NIF_TERM gen_bmp_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM arg
     {
        return enif_make_badarg(env);
     }
-  matrix = (float *) matrix_el.data;
+  matrix = (int *) matrix_el.data;
   
-  matrix +=2; 
+  
   //// END GET MATREX
   
   int matrex_size=dim*dim*4;
