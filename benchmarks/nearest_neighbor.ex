@@ -139,7 +139,6 @@ end
   end
 end
 
-Hok.include [NN]
 
 [arg] = System.argv()
 
