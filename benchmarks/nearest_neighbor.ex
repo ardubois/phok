@@ -36,7 +36,7 @@ defmodule DataSet do
 end
 
 
-Hok.defmodule NN do
+Hok.defmodule_jit NN do
   include CAS
   def euclid_seq(l,lat,lng), do: euclid_seq_(l,lat,lng,[])
   def euclid_seq_([m_lat,m_lng|array],lat,lng,data) do
@@ -50,18 +50,19 @@ Hok.defmodule NN do
   def euclid_seq_([],_lat,_lng, data) do
     data
   end
-  def reduce(ref4,  f) do
+  def reduce(ref,  f) do
 
-    {_r,{_l,size}} = ref4
-    result_gpu =Hok.new_gmatrex(Matrex.new([[0]]))
+    {l,c} = Hok.get_shape_gnx(ref)
+    type = Hok.get_type_gnx(ref)
+    size = l*c
+     result_gpu  = Hok.new_gnx(Nx.tensor([[0]] , type: type))
 
-
-    threadsPerBlock = 256
-    blocksPerGrid = div(size + threadsPerBlock - 1, threadsPerBlock)
-    numberOfBlocks = blocksPerGrid
-    Hok.spawn(Hok.lt(&NN.reduce_kernel/4),{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref4, result_gpu, f, size])
-    result_gpu
-end
+     threadsPerBlock = 256
+     blocksPerGrid = div(size + threadsPerBlock - 1, threadsPerBlock)
+     numberOfBlocks = blocksPerGrid
+     Hok.spawn_jit(&DP.reduce_kernel/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref, result_gpu, f, size])
+     result_gpu
+ end
 defk reduce_kernel(a, ref4, f,n) do
 
   __shared__ cache[256]
@@ -105,7 +106,6 @@ if (cacheIndex == 0) do
 end
 
 end
-  deft map_step_2para_1resp_kernel gmatrex ~> gmatrex ~> integer ~> float ~> float ~> integer ~> [gmatrex ~> float ~> float ~> float] ~> unit
   defk map_step_2para_1resp_kernel(d_array, d_result, step,  par1, par2,size,f) do
 
     var globalId int = blockDim.x * ( gridDim.x * blockIdx.y + blockIdx.x ) + threadIdx.x
@@ -121,13 +121,11 @@ end
       Hok.spawn(Hok.lt(&NN.map_step_2para_1resp_kernel/7),{size,1,1},{1,1,1},[d_array,distances_device,step,par1,par2,size,f])
       distances_device
   end
-  deft euclid gmatrex ~> float ~> float ~> float
   defh euclid(d_locations, lat, lng) do
     return sqrt((lat-d_locations[0])*(lat-d_locations[0])+(lng-d_locations[1])*(lng-d_locations[1]))
       #return sqrt((lat-d_locations[0])*(lat-d_locations[0])+(lng-d_locations[1])*(lng-d_locations[1]))
     end
 
-  deft menor float ~> float ~> float
   defh menor(x,y) do
     if y == 0.0 do
       x
@@ -150,18 +148,18 @@ size = String.to_integer(arg)
 
 list_data_set = DataSet.gen_data_set(size)
 
-data_set_host = Matrex.new([list_data_set])
+data_set_host = Nx.tensor([list_data_set], :type {:f,32})
 
 
 prev = System.monotonic_time()
-data_set_device = Hok.new_gmatrex(data_set_host)
+data_set_device = Hok.new_gnx(data_set_host)
 
 nn_d = data_set_device
       |> NN.map_step_2para_1resp(2,0.0,0.0,size, Hok.lt(&NN.euclid/3))
       |> NN.reduce(Hok.lt(&NN.menor/2))
 
 
-_nn = Hok.get_gmatrex(nn_d)
+_nn = Hok.get_gnx(nn_d)
 
 next = System.monotonic_time()
 IO.puts "Hok\t#{size}\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
