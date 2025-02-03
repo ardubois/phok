@@ -323,7 +323,7 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
           return enif_make_badarg(env);
        }
 
-      doubless[doubles_ptr] =  darg;
+      doubles[doubles_ptr] =  darg;
        args[i] = (void*)  &doubles[doubles_ptr];
        doubles_ptr++;  
 
