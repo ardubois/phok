@@ -108,6 +108,7 @@ end
 end
   defk map_step_2para_1resp_kernel(d_array, d_result, step,  par1, par2,size,f) do
 
+
     var globalId int = blockDim.x * ( gridDim.x * blockIdx.y + blockIdx.x ) + threadIdx.x
 
     var id int = step * globalId
@@ -117,7 +118,9 @@ end
     end
   end
   def map_step_2para_1resp(d_array,step, par1, par2, size, f) do
-      distances_device = Hok.new_gmatrex(1,size)
+    type = Hok.get_type_gnx(d_array)
+
+      distances_device = Hok.new_gnx(1,size, type)
       Hok.spawn_jit(&NN.map_step_2para_1resp_kernel/7,{size,1,1},{1,1,1},[d_array,distances_device,step,par1,par2,size,f])
       distances_device
   end
