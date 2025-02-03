@@ -148,7 +148,7 @@ size = String.to_integer(arg)
 
 list_data_set = DataSet.gen_data_set(size)
 
-data_set_host = Nx.tensor([list_data_set], :type {:f,32})
+data_set_host = Nx.tensor([list_data_set], type: {:f,32})
 
 
 prev = System.monotonic_time()
