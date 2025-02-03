@@ -118,7 +118,7 @@ end
   end
   def map_step_2para_1resp(d_array,step, par1, par2, size, f) do
       distances_device = Hok.new_gmatrex(1,size)
-      Hok.spawn(Hok.lt(&NN.map_step_2para_1resp_kernel/7),{size,1,1},{1,1,1},[d_array,distances_device,step,par1,par2,size,f])
+      Hok.spawn_jit(Hok.lt(&NN.map_step_2para_1resp_kernel/7),{size,1,1},{1,1,1},[d_array,distances_device,step,par1,par2,size,f])
       distances_device
   end
   defh euclid(d_locations, lat, lng) do
