@@ -289,7 +289,6 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
     
     if (strcmp(type_name, "int") == 0) 
     {
-      printf("arg int\n") ;
        int iarg;
       if(! enif_get_int(env, head_args, &iarg))
        { printf("error getting int arg\n");
@@ -300,7 +299,36 @@ static ERL_NIF_TERM jit_compile_and_launch_nif(ErlNifEnv *env, int argc, const E
        ints_ptr++;
 
 
-    } else if (strcmp(type_name, "tint") == 0)
+    } else if (strcmp(type_name, "float") == 0)
+    {
+
+      
+      double darg;
+      if(! enif_get_double(env, head_args, &darg))
+      { printf("error getting float arg\n");
+          return enif_make_badarg(env);
+       }
+
+      floats[floats_ptr] = (float) darg;
+       args[i] = (void*)  &floats[floats_ptr];
+       floats_ptr++;  
+
+    } else if (strcmp(type_name, "double") == 0)
+    {
+
+      
+      double darg;
+      if(! enif_get_double(env, head_args, &darg))
+      { printf("error getting double arg\n");
+          return enif_make_badarg(env);
+       }
+
+      doubless[doubles_ptr] =  darg;
+       args[i] = (void*)  &doubles[doubles_ptr];
+       doubles_ptr++;  
+
+    }
+    else if (strcmp(type_name, "tint") == 0)
     {
   
       CUdeviceptr *array_res;
