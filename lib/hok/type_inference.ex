@@ -623,6 +623,9 @@ end
                           end
                 :float -> :float
                 :double -> :double
+                :tfloat -> :tfloat
+                :tdouble-> :tdouble
+                :tint -> :tint
                 _ -> raise "Incompatible operands (#{inspect info}: op (#{inspect op}) applyed to  type #{inspect t1}"
 
               end
