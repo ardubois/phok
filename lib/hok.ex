@@ -393,7 +393,7 @@ def new_gmatrex(%Matrex{data: matrix} = a) do
   {ref, Matrex.size(a)}
 end
 def teste_gmatrex(%Matrex{data: matrix} = a) do
-  <<v1::16,v2::16,x::binary>> = matrix
+  <<v1::32,v2::32,x::binary>> = matrix
   IO.inspect v1
   IO.inspect v2
   IO.inspect x
