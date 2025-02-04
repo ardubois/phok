@@ -392,6 +392,12 @@ def new_gmatrex(%Matrex{data: matrix} = a) do
   ref=create_ref_nif(matrix)
   {ref, Matrex.size(a)}
 end
+def teste_gmatrex(%Matrex{data: matrix} = a) do
+  <<v1::16,v2::16,x::binary>> = matrix
+  IO.inspect v1
+  IO.inspect v2
+  IO.inspect x
+end
 def new_gmatrex((%Nx.Tensor{data: data, type: type, shape: shape, names: name}) ) do
   %Nx.BinaryBackend{ state: array} = data
   {l,c} = shape
