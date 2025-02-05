@@ -152,6 +152,13 @@ list_data_set = DataSet.gen_data_set(size)
 
 data_set_host = Nx.tensor([list_data_set], type: {:f,32})
 
+tensor = Nx.tensor([1,2,3,4,5,6,7], type: {:f,32})
+
+tensor
+|> NN.reduce(&NN.menor/2)
+|> IO.inspect
+
+raise "hell"
 
 prev = System.monotonic_time()
 data_set_device = Hok.new_gnx(data_set_host)
