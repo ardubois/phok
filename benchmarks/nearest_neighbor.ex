@@ -157,6 +157,7 @@ tensor = Nx.tensor([[1,2,3,4,5,6,7]], type: {:f,32})
 tensor
 |> Hok.new_gnx
 |> NN.reduce(&NN.menor/2)
+|> Hok.get_gnx
 |> IO.inspect
 
 raise "hell"
