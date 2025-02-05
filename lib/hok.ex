@@ -258,7 +258,7 @@ def new_gnx(%Matrex{data: matrix} = a) do
   {:matrex, ref, Matrex.size(a)}
 end
 def new_gnx(l,c,type) do
-
+  IO.puts "aque"
   ref = case type do
     {:f,32} -> new_gpu_array_nif(l,c,Kernel.to_charlist("float"))
     {:f,64} -> new_gpu_array_nif(l,c,Kernel.to_charlist("double"))
