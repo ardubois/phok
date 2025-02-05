@@ -313,6 +313,7 @@ defp process_definitions(module_name,[h|t]) do
 
 
                                         body = Hok.TypeInference.add_return(Map.put(%{}, :return, :none), body)
+                                        IO.inspect body
                                         funs = find_functions({:defh , ii, [header,[body]]})
                                        # IO.inspect "Function graph: #{inspect funs}"
                                        # IO.inspect "body: #{inspect body}"
