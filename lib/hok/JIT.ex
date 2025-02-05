@@ -174,6 +174,7 @@ def infer_types({:defk,_,[_header,[body]]},delta) do
   Hok.TypeInference.type_check(delta,body)
 end
 def infer_types({:defh,_,[_header,[body]]},delta) do
+  IO.inspect body
   Hok.TypeInference.type_check(delta,body)
 end
 def infer_types({:fn, _, [{:->, _ , [_para,body]}] },delta) do
