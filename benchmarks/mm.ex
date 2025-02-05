@@ -63,6 +63,8 @@ IO.puts "Hok\t#{m}\t#{System.convert_time_unit(next-prev,:native,:millisecond)} 
 
 IO.inspect result
 
+IO.inspect Nx.sum(result)
+
 #Hok.null(mat1)
 #Hok.null(mat2)
 #m1 = Matrex.reshape(mat1,m,m)
