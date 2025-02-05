@@ -312,7 +312,7 @@ defp process_definitions(module_name,[h|t]) do
                                       #  IO.inspect "Process definitions: #{fname}"
 
 
-                                        body = Hok.CudaBackend.add_return(body)
+                                        body = JIT.add_return(body)
                                         funs = find_functions({:defh , ii, [header,[body]]})
                                        # IO.inspect "Function graph: #{inspect funs}"
                                        # IO.inspect "body: #{inspect body}"

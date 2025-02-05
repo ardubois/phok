@@ -131,12 +131,12 @@ end
 
   defh menor(x,y) do
     if y == 0.0 do
-      return x
+      x
     else
      if (x<y) do
-      return x
+      x
      else
-      return y
+       y
      end
     end
   end
