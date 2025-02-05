@@ -21,7 +21,7 @@ end
 def comp2xy2D1p(arr1,arr2,par,size1,size2,f) do
 
 
-    result_gpu = Hok.new_gnx(size1,size2,Nx.type(arr1))
+    result_gpu = Hok.new_gnx(size1,size2,Hok.get_array_type(arr1))
     arr1_gpu = Hok.new_gnx(arr1)
     arr2_gpu = Hok.new_gnx(arr2)
 
