@@ -39,11 +39,11 @@ m = String.to_integer(arg)
 #vet1 = Nx.iota({m,m}, type: :f32)
 #vet2 = Nx.iota({m,m}, type: :f32)
 
-{mat1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {m, m}, type: :f32)
-{mat2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {m, m}, type: :f32)
+#{mat1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {m, m}, type: :f32)
+#{mat2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {m, m}, type: :f32)
 
-#mat1 = Matrex.new(1, m*m, fn -> :rand.uniform(1000) end)
-#mat2 = Matrex.new(1, m*m, fn -> :rand.uniform(1000) end)
+mat1 = Matrex.new(1, m*m, fn -> :rand.uniform(1000) end)
+mat2 = Matrex.new(1, m*m, fn -> :rand.uniform(1000) end)
 
 prev = System.monotonic_time()
 
