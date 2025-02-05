@@ -292,13 +292,22 @@ def new_nx_from_function(l,c,type, fun) do
   size = l*c
   ref =case type do
     {:f,32} -> new_matrix_from_function_f(size-1,fun, <<fun.()::float-little-32>>)
-    {:f,64} -> new_matrix_from_function_f(size-1,fun, <<fun.()::float-little-32>>)
+    {:f,64} -> new_matrix_from_function_d(size-1,fun, <<fun.()::float-little-64>>)
     {:s,32} -> new_matrix_from_function_i(size-1,fun, <<fun.()::integer-little-32>>)
   end
    %Nx.Tensor{data: %Nx.BinaryBackend{ state: ref}, type: type, shape: {l,c}, names:  [nil,nil]}
 end
 
 #######################
+defp new_matrix_from_function_d(0, _, accumulator), do: accumulator
+
+  defp new_matrix_from_function_d(size, function, accumulator),
+    do:
+      new_matrix_from_function_d(
+        size - 1,
+        function,
+        <<accumulator::binary, function.()::float-little-64>>
+      )
 defp new_matrix_from_function_i(0, _, accumulator), do: accumulator
 
   defp new_matrix_from_function_i(size, function, accumulator),
