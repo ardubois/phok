@@ -290,18 +290,34 @@ end
 #end
 def new_nx_from_function(l,c,type, fun) do
   size = l*c
-   ref = new_matrix_from_function(size-1,fun, <<fun.()::float-little-32>>)
+  case type do
+    {:f,32} -> new_matrix_from_function_f(size-1,fun, <<fun.()::float-little-32>>)
+    {:f,64} -> get_gpu_array_nif(ref,l,c,Kernel.to_charlist("double"))
+    {:s,32} -> new_matrix_from_function_i(size-1,fun, <<fun.()::float-little-32>>)
+   ref =
    %Nx.Tensor{data: %Nx.BinaryBackend{ state: ref}, type: type, shape: {l,c}, names:  [nil,nil]}
 end
-defp new_matrix_from_function(0, _, accumulator), do: accumulator
 
-  defp new_matrix_from_function(size, function, accumulator),
+#######################
+defp new_matrix_from_function_i(0, _, accumulator), do: accumulator
+
+  defp new_matrix_from_function_i(size, function, accumulator),
     do:
-      new_matrix_from_function(
+      new_matrix_from_function_i(
+        size - 1,
+        function,
+        <<accumulator::binary, function.()::int-little-32>>
+      )
+defp new_matrix_from_function_f(0, _, accumulator), do: accumulator
+
+  defp new_matrix_from_function_f(size, function, accumulator),
+    do:
+      new_matrix_from_function_f(
         size - 1,
         function,
         <<accumulator::binary, function.()::float-little-32>>
       )
+##############################
 def new_gnx_fake(_size,type) do
   {:nx, type, :shape, :name, :ref}
 end
