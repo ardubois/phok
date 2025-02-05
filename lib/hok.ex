@@ -288,8 +288,20 @@ end
 #def get_gnx({:matrex, ref,{rows,cols}}) do
 #  %Matrex{data: get_matrex_nif(ref,rows,cols)}
 #end
-def new_gnx_from_function(_l,_c,_type) do
+def new_nx_from_function(l,c,type, fun) do
+  size = l*c
+   ref = new_matrix_from_function(size-1,fun, <<fun.()::float-little-32>>)
+   %Nx.Tensor{data: %Nx.BinaryBackend{ state: ref}, type: type, shape: shape, names:  [nil,nil]}
 end
+defp new_matrix_from_function(0, _, accumulator), do: %Matrex{data: accumulator}
+
+  defp new_matrix_from_function(size, function, accumulator),
+    do:
+      new_matrix_from_function(
+        size - 1,
+        function,
+        <<accumulator::binary, function.()::float-little-32>>
+      )
 def new_gnx_fake(_size,type) do
   {:nx, type, :shape, :name, :ref}
 end
