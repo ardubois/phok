@@ -292,8 +292,8 @@ def new_nx_from_function(l,c,type, fun) do
   size = l*c
   case type do
     {:f,32} -> new_matrix_from_function_f(size-1,fun, <<fun.()::float-little-32>>)
-    {:f,64} -> get_gpu_array_nif(ref,l,c,Kernel.to_charlist("double"))
-    {:s,32} -> new_matrix_from_function_i(size-1,fun, <<fun.()::float-little-32>>)
+    {:f,64} -> new_matrix_from_function_f(size-1,fun, <<fun.()::float-little-32>>)
+    {:s,32} -> new_matrix_from_function_i(size-1,fun, <<fun.()::int-little-32>>)
    ref =
    %Nx.Tensor{data: %Nx.BinaryBackend{ state: ref}, type: type, shape: {l,c}, names:  [nil,nil]}
 end
