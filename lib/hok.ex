@@ -341,7 +341,7 @@ def new_gnx_fake ((%Nx.Tensor{data: _data, type: type, shape: shape, names: name
   #end
   {:nx, type, shape, name , :ref}
 end
-def get_array_type(%Nx.Tensor{data: _data, type: type, shape: shape, names: name} = nx) do
+def get_array_type(%Nx.Tensor{data: _data, type: _type, shape: _shape, names: _name} = nx) do
   Nx.type(nx)
 end
 def get_array_type(%Matrex{data: _matrix}) do
