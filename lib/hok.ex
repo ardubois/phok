@@ -283,9 +283,9 @@ def get_gnx({:nx, type, shape, name , ref}) do
 
   %Nx.Tensor{data: %Nx.BinaryBackend{ state: ref}, type: type, shape: shape, names: name}
 end
-def get_gnx({:matrex, ref,{rows,cols}}) do
-  %Matrex{data: get_matrex_nif(ref,rows,cols)}
-end
+#def get_gnx({:matrex, ref,{rows,cols}}) do
+#  %Matrex{data: get_matrex_nif(ref,rows,cols)}
+#end
 def new_gnx_from_function(_l,_c,_type) do
 end
 def new_gnx_fake(_size,type) do
