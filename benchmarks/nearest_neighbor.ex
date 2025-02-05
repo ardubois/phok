@@ -152,7 +152,7 @@ list_data_set = DataSet.gen_data_set(size)
 
 data_set_host = Nx.tensor([list_data_set], type: {:f,32})
 
-tensor = Nx.tensor([[1..1000]], type: {:f,32})
+tensor = Nx.tensor([Enum.to_list(1..1000)], type: {:f,32})
 
 tensor
 |> Hok.new_gnx
