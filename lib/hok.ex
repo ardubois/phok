@@ -291,7 +291,7 @@ end
 def new_nx_from_function(l,c,type, fun) do
   size = l*c
    ref = new_matrix_from_function(size-1,fun, <<fun.()::float-little-32>>)
-   %Nx.Tensor{data: %Nx.BinaryBackend{ state: ref}, type: type, shape: shape, names:  [nil,nil]}
+   %Nx.Tensor{data: %Nx.BinaryBackend{ state: ref}, type: type, shape: {l,c}, names:  [nil,nil]}
 end
 defp new_matrix_from_function(0, _, accumulator), do: %Matrex{data: accumulator}
 
