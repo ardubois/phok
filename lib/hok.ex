@@ -235,7 +235,7 @@ end
 def get_shape_gnx({:nx, _type, shape, _name , _ref}) do
   shape
 end
-def new_gnx((%Nx.Tensor{data: data, type: type, shape: shape, names: name}) ) do
+def new_gnx(%Nx.Tensor{data: data, type: type, shape: shape, names: name}) do
   %Nx.BinaryBackend{ state: array} = data
  # IO.inspect name
  # raise "hell"
@@ -247,11 +247,12 @@ def new_gnx((%Nx.Tensor{data: data, type: type, shape: shape, names: name}) ) do
      {:f,32} -> create_gpu_array_nx_nif(array,l,c,Kernel.to_charlist("float"))
      {:f,64} -> create_gpu_array_nx_nif(array,l,c,Kernel.to_charlist("double"))
      {:s,32} -> create_gpu_array_nx_nif(array,l,c,Kernel.to_charlist("int"))
-     x -> raise "new_gmatrex: type #{x} not suported"
+     x -> raise "new_gnx: type #{x} not suported"
   end
   {:nx, type, shape, name , ref}
 end
 def new_gnx(%Matrex{data: matrix} = a) do
+  IO.puts "aqui!"
     <<l::unsigned-integer-little-32,c::unsigned-integer-little-32,z::binary>> = matrix
     ref = create_gpu_array_nx_nif(z,l,c,Kernel.to_charlist("float"))
   {:matrex, ref, Matrex.size(a)}
@@ -262,7 +263,7 @@ def new_gnx(l,c,type) do
     {:f,32} -> new_gpu_array_nif(l,c,Kernel.to_charlist("float"))
     {:f,64} -> new_gpu_array_nif(l,c,Kernel.to_charlist("double"))
     {:s,32} -> new_gpu_array_nif(l,c,Kernel.to_charlist("int"))
-    x -> raise "new_gmatrex: type #{x} not suported"
+    x -> raise "new_gnx: type #{x} not suported"
  end
 
  {:nx, type, {l,c}, [nil,nil] , ref}
