@@ -274,7 +274,7 @@ def get_gnx({:matrex, ref, {rows,columns}}) do
   %Matrex{data: array}
 end
 def get_gnx({:nx, type, shape, name , ref}) do
-  IO.puts "aqui..."
+  #IO.puts "aqui..."
   {l,c} = shape
   ref = case type do
     {:f,32} -> get_gpu_array_nif(ref,l,c,Kernel.to_charlist("float"))
