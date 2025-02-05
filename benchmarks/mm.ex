@@ -52,7 +52,7 @@ prev = System.monotonic_time()
 
 
 
-result = Hok.gpufor x <- 0..m, y <- 0..m, mat1, mat2,m do
+_result = Hok.gpufor x <- 0..m, y <- 0..m, mat1, mat2,m do
             sum = 0.0
             for i in range(0,m,1) do
                   sum = sum + mat1[x * m + i] * mat2[i * m + y]
@@ -64,9 +64,9 @@ next = System.monotonic_time()
 
 IO.puts "Hok\t#{m}\t#{System.convert_time_unit(next-prev,:native,:millisecond)} "
 
-IO.inspect result
+#IO.inspect result
 
-IO.inspect Nx.sum(result)
+#IO.inspect Nx.sum(result)
 
 #Hok.null(mat1)
 #Hok.null(mat2)
