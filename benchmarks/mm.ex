@@ -27,7 +27,7 @@ def comp2xy2D1p(arr1,arr2,par,size1,size2,f) do
 
     MM.map2xy2D1p(arr1_gpu, arr2_gpu,par, result_gpu, size1,f)
 
-    r_gpu = Hok.get_gmatrex(result_gpu)
+    r_gpu = Hok.get_gnx(result_gpu)
     r_gpu
 end
 end
@@ -61,8 +61,8 @@ next = System.monotonic_time()
 
 IO.puts "Hok\t#{m}\t#{System.convert_time_unit(next-prev,:native,:millisecond)} "
 
-Hok.null(mat1)
-Hok.null(mat2)
+#Hok.null(mat1)
+#Hok.null(mat2)
 #m1 = Matrex.reshape(mat1,m,m)
 #m2 = Matrex.reshape(mat2,m,m)
 #res_cpu = Matrex.dot(m1,m2)
