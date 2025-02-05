@@ -63,6 +63,7 @@ defmodule Hok.TypeInference do
               _ ->  if is_exp?(exp) do
                       {:do, {:return,[],[exp]}}
                     else
+                      IO.puts("ahhhhhhhhhhhhhhh")
                       {:do, exp}
                     end
             end
