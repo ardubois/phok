@@ -252,24 +252,9 @@ def new_gnx((%Nx.Tensor{data: data, type: type, shape: shape, names: name}) ) do
   {:nx, type, shape, name , ref}
 end
 def new_gnx(%Matrex{data: matrix} = a) do
-  kref=create_ref_nif(matrix)
-  {:matrex, kref, Matrex.size(a)}
-end
-def new_gnx( ) do
-  %Nx.BinaryBackend{ state: array} = data
- # IO.inspect name
- # raise "hell"
-  {l,c} = case shape do
-    {c} -> {1,c}
-    {l,c} -> {l,c}
-  end
-  ref = case type do
-     {:f,32} -> create_gpu_array_nx_nif(array,l,c,Kernel.to_charlist("float"))
-     {:f,64} -> create_gpu_array_nx_nif(array,l,c,Kernel.to_charlist("double"))
-     {:s,32} -> create_gpu_array_nx_nif(array,l,c,Kernel.to_charlist("int"))
-     x -> raise "new_gmatrex: type #{x} not suported"
-  end
-  {:nx, type, shape, name , ref}
+    <<l::unsigned-integer-little-32,c::unsigned-integer-little-32,z::binary>> = matrix
+    ref = create_gpu_array_nx_nif(z,l,c,Kernel.to_charlist("float"))
+  {:matrex, ref, Matrex.size(a)}
 end
 def new_gnx(l,c,type) do
 
@@ -282,7 +267,11 @@ def new_gnx(l,c,type) do
 
  {:nx, type, {l,c}, [nil,nil] , ref}
 end
-
+def get_gnx({:matrex, ref, {rows,columns}}) do
+  bin = get_gpu_array_nif(ref,rows,columns,Kernel.to_charlist("float"))
+  array = <<rows::unsigned-integer-little-32, columns::unsigned-integer-little-32,bin::binary>>
+  %Matrex{data: array}
+end
 def get_gnx({:nx, type, shape, name , ref}) do
   {l,c} = shape
   ref = case type do
@@ -297,7 +286,8 @@ end
 def get_gnx({:matrex, ref,{rows,cols}}) do
   %Matrex{data: get_matrex_nif(ref,rows,cols)}
 end
-
+def new_gnx_from_function(_l,_c,_type) do
+end
 def new_gnx_fake(_size,type) do
   {:nx, type, :shape, :name, :ref}
 end
@@ -415,13 +405,7 @@ def new_gmatrex(%Matrex{data: matrix} = a) do
   ref=create_ref_nif(matrix)
   {ref, Matrex.size(a)}
 end
-def teste_gmatrex(%Matrex{data: matrix} = a) do
-  <<v1::32,v2::32,x::32,z::binary>> = matrix
-  IO.inspect v1
-  IO.inspect v2
-  IO.inspect z
-  IO.inspect x
-end
+
 def new_gmatrex((%Nx.Tensor{data: data, type: type, shape: shape, names: name}) ) do
   %Nx.BinaryBackend{ state: array} = data
   {l,c} = shape

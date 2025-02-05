@@ -203,6 +203,7 @@ def infer_types_actual_parameters([h|t])do
           {:f,64} -> [:tdouble | infer_types_actual_parameters(t)]
           {:s,32} -> [:tint | infer_types_actual_parameters(t)]
         end
+    {:matrex, _kref, _size} -> [:tfloat | infer_types_actual_parameters(t)]
     {:anon,_name,_code} ->     [:none | infer_types_actual_parameters(t)]
     float when  is_float(float) ->
         [:float | infer_types_actual_parameters(t)]
