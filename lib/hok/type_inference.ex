@@ -64,6 +64,7 @@ defmodule Hok.TypeInference do
                       {:do, {:return,[],[exp]}}
                     else
                       IO.puts("ahhhhhhhhhhhhhhh")
+                      IO.inspect exp
                       {:do, exp}
                     end
             end
