@@ -45,8 +45,8 @@ m = String.to_integer(arg)
 #mat1 = Matrex.new(1, m*m, fn -> :rand.uniform(1000) end)
 #mat2 = Matrex.new(1, m*m, fn -> :rand.uniform(1000) end)
 
-mat1 = Hok.new_nx_from_function(1,m*m,{:f,32},:rand.uniform(1000) )
-mat2 = Hok.new_nx_from_function(1,m*m,{:f,32},:rand.uniform(1000) )
+mat1 = Hok.new_nx_from_function(1,m*m,{:f,32},fn -> :rand.uniform(1000) end )
+mat2 = Hok.new_nx_from_function(1,m*m,{:f,32},fn -> :rand.uniform(1000) end)
 
 prev = System.monotonic_time()
 
