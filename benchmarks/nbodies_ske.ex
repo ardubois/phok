@@ -31,9 +31,9 @@ Hok.defmodule_jit NBodies do
       p[2] = p[2] + p[5]*dt;
 
   end
-  defk map_step_2_para_no_resp_kernel(d_array, step,  par1, par2,size,f) do
+  defk map_step_2_para_no_resp_kernel(d_array,  par1, par2,size,f) do
 
-
+    step =
     var globalId int = blockDim.x * ( gridDim.x * blockIdx.y + blockIdx.x ) + threadIdx.x
 
     var id int = step * globalId
@@ -124,12 +124,11 @@ nBlocks = floor ((nBodies + block_size - 1) / block_size)
 #dt = 0.01; # time step
 size_body = 6
 
-size_array = size_body * nBodies
 
 
-#h_buf = Hok.new_nx_from_function(1,size_array,{:f,32},fn -> :rand.uniform() end )
+h_buf = Hok.new_nx_from_function(nBodies,size_body,{:f,32},fn -> :rand.uniform() end )
 
-h_buf = Hok.new_nx_from_function(1,size_array,{:f,32},fn -> 1 end )
+#h_buf = Hok.new_nx_from_function(nBodies,size_body,{:f,32},fn -> 1 end )
 
 #IO.inspect h_buf
 
@@ -138,8 +137,8 @@ prev = System.monotonic_time()
 d_buf = Hok.new_gnx(h_buf)
 
 gpu_resp = d_buf
-  |> NBodies.map_step_2_para_no_resp(size_body,d_buf,nBodies,nBodies, &NBodies.gpu_nBodies/3)
-  |> NBodies.map_step_2_para_no_resp(size_body, 0.01,nBodies,nBodies, &NBodies.gpu_integrate/3)
+  |> NBodies.map_2_para_no_resp(d_buf,nBodies,nBodies, &NBodies.gpu_nBodies/3)
+  |> NBodies.map_2_para_no_resp( 0.01,nBodies,nBodies, &NBodies.gpu_integrate/3)
   |> Hok.get_gnx
   |> IO.inspect
 
