@@ -145,6 +145,8 @@ gpu_resp = d_buf
   |> Hok.get_gnx
   |> IO.inspect
 
+  next = System.monotonic_time()
+
 IO.puts "PolyHok\t#{user_value}\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
 #IO.inspect gpu_resp
