@@ -109,10 +109,10 @@ softening = 0.000000001;
 dt = 0.01; # time step
 size_body = 6
 
-size_matrex = size_body * nBodies
+size_array = size_body * nBodies
 
 
-h_buf = Hok.new_nx_from_function(1,n,{:f,32},fn -> :rand.uniform(1) end )
+h_buf = Hok.new_nx_from_function(1,size_array,{:f,32},fn -> :rand.uniform(1) end )
 
 prev = System.monotonic_time()
 
