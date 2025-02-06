@@ -148,7 +148,7 @@ char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
         printf("Compilation error; log: %s\n", log);
 
         fail_nvrtc(env,erro_g,"nvrtcCompileProgram");
-        return enif_make_int(env, 0);
+        //return enif_make_int(env, 0);
 
     }
     // get ptx code
