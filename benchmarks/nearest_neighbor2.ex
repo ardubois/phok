@@ -142,15 +142,15 @@ list_data_set = DataSet.gen_data_set(size)
 
 data_set_host = Nx.tensor([list_data_set], type: {:f,32})
 
-tensor = Nx.tensor([Enum.reverse(Enum.to_list(1..500))++ [-1]++ Enum.reverse(Enum.to_list(1..500))], type: {:f,32})
+#tensor = Nx.tensor([Enum.reverse(Enum.to_list(1..500))++ [-1]++ Enum.reverse(Enum.to_list(1..500))], type: {:f,32})
 
-tensor
-|> Hok.new_gnx
-|> NN.reduce(&NN.menor/2)
-|> Hok.get_gnx
-|> IO.inspect
+#tensor
+#|> Hok.new_gnx
+#|> NN.reduce(&NN.menor/2)
+#|> Hok.get_gnx
+#|> IO.inspect
 
-raise "hell"
+#raise "hell"
 
 prev = System.monotonic_time()
 data_set_device = Hok.new_gnx(data_set_host)
