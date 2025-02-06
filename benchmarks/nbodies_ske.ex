@@ -118,8 +118,8 @@ user_value = String.to_integer(arg)
 
 
 nBodies = user_value #3000;
-block_size =  128;
-nBlocks = floor ((nBodies + block_size - 1) / block_size)
+#block_size =  128;
+#nBlocks = floor ((nBodies + block_size - 1) / block_size)
 #softening = 0.000000001
 #dt = 0.01; # time step
 size_body = 6
