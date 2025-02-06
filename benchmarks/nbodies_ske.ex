@@ -2,7 +2,7 @@ require Hok
 
 Hok.defmodule_jit NBodies do
 
-  defk gpu_nBodies(p,c,n) do
+  defh gpu_nBodies(p,c,n) do
     softening = 0.000000001
 
   if (i < n) do
@@ -28,7 +28,7 @@ Hok.defmodule_jit NBodies do
     end
 
   end
-  defk gpu_integrate(p, dt, n) do
+  defh gpu_integrate(p, dt, n) do
     if (i < n) do
       p[0] = p[0] + p[3]*dt;
       p[1] = p[1] + p[4]*dt;
