@@ -622,6 +622,9 @@ end
             [a1] ->
               find_type_exp(map,a1)
             [a1,a2] ->
+              IO.puts "debug"
+              IO.inspect map
+              IO.inspect ai
               t1 = find_type_exp(map,a1)
               t2 = find_type_exp(map,a2)
               case t1 do
