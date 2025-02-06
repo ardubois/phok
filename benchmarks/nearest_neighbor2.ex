@@ -129,6 +129,7 @@ Hok.defmodule_jit NN do
      else
        y
      end
+    end
 end
 
 
