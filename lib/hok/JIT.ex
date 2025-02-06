@@ -31,14 +31,14 @@ defmodule JIT do
     [function]
 end
 def compile_function({name,type}) do
-  #IO.puts "Compile function: #{name}"
+  IO.puts "Compile function: #{name}"
   nast = Hok.load_ast(name)
   case nast do
     nil -> [""]
     {fast,fun_graph} ->
           delta = gen_delta_from_type(fast,type)
-          #IO.inspect "Delta: #{inspect delta}"
-          #IO.inspect "Call graph: #{inspect fun_graph}"
+          IO.inspect "Delta: #{inspect delta}"
+          IO.inspect "Call graph: #{inspect fun_graph}"
           inf_types = JIT.infer_types(fast,delta)
           #IO.inspect "inf_types: #{inspect inf_types}"
           {:defh,_iinfo,[header,[body]]} = fast
