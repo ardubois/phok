@@ -764,7 +764,7 @@ def spawn_jit(k,t,b,l) do
                 |> Enum.map(fn x -> {x, inf_types[x]} end)
                 |> Enum.filter(fn {_,i} -> i != nil end)
   #IO.inspect funs
-  #IO.inspect other_funs
+  IO.inspect other_funs
   comp = Enum.map(funs++other_funs,&JIT.compile_function/1)
   comp = Enum.reduce(comp,[], fn x, y -> y++x end)
   #IO.puts comp
