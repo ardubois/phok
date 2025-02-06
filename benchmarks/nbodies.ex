@@ -1,4 +1,6 @@
 require Hok
+Mix.install([{:random, "~> 0.2.4"}])
+
 Hok.defmodule_jit NBodies do
 
   defk gpu_nBodies(p,dt,n,softening) do
@@ -112,7 +114,7 @@ size_body = 6
 size_array = size_body * nBodies
 
 
-h_buf = Hok.new_nx_from_function(1,size_array,{:f,32},fn -> :rand.uniform(1) end )
+h_buf = Hok.new_nx_from_function(1,size_array,{:f,32},fn -> Random.rand(1) end )
 
 IO.inspect h_buf
 
