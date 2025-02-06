@@ -114,9 +114,11 @@ size_array = size_body * nBodies
 
 h_buf = Hok.new_nx_from_function(1,size_array,{:f,32},fn -> :rand.uniform(1) end )
 
+IO.inspect h_buf
+
 prev = System.monotonic_time()
 
-d_buf = Hok.new_gnx(Nx.tensor([h_buf]))
+d_buf = Hok.new_gnx(h_buf)
 
 
 Hok.spawn_jit(&NBodies.gpu_nBodies/4,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies,softening])
