@@ -84,8 +84,8 @@ end
 n = String.to_integer(arg)
 
 
-{vet1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
-{vet2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
+#{vet1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
+#{vet2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
 
 #IO.inspect vet1
 
@@ -95,13 +95,9 @@ n = String.to_integer(arg)
 #vet1 = Hok.new_nx_from_function(1,n,{:f,32},fn -> :rand.uniform(1000) end )
 #vet2 = Hok.new_nx_from_function(1,n,{:f,32},fn -> :rand.uniform(1000) end)
 
-#(Math.random() * (upper - lower)) + lower
 
-#vet1 = Hok.new_nx_from_function(1,n,{:f,32},fn -> (:rand.uniform(1)* 2)-1 end )
-#vet2 = Hok.new_nx_from_function(1,n,{:f,32},fn -> (:rand.uniform(1)* 2)-1 end)
-#IO.inspect vet1
-
-#vet1 = Hok.new_nx_from_function(1,n,{:f,64},fn -> 1.0 end )
+vet1 = Hok.new_nx_from_function(1,n,{:f,64},fn -> 1.0 end )
+vet2 = Hok.new_nx_from_function(1,n,{:f,64},fn -> 1.0 end
 #vet2 = Nx.tensor([Enum.to_list(1..n)], type: {:f,32})
 
 prev = System.monotonic_time()
