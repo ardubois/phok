@@ -4,7 +4,6 @@ Hok.defmodule_jit NBodies do
 
   defh gpu_nBodies(p,c,n) do
     softening = 0.000000001
-
     dt = 0.01
     fx = 0.0
     fy = 0.0
@@ -120,7 +119,7 @@ user_value = String.to_integer(arg)
 nBodies = user_value #3000;
 block_size =  128;
 nBlocks = floor ((nBodies + block_size - 1) / block_size)
-softening = 0.000000001
+#softening = 0.000000001
 #dt = 0.01; # time step
 size_body = 6
 
@@ -139,7 +138,7 @@ d_buf = Hok.new_gnx(h_buf)
 
 gpu_resp = d_buf
   |> NBodies.map_step_2_para_no_resp(size_body,d_buf,nBodies,nBodies, &NBodies.gpu_nBodies/3)
-  |> NBodies.map_step_2_para_no_resp(size_body, 0.01,nBodies,nBodies, &NBodies.gpu_nBodies/3)
+  |> NBodies.map_step_2_para_no_resp(size_body, 0.01,nBodies,nBodies, &NBodies.gpu_integrate/3)
   |> Hok.get_gnx
   |> IO.inspect
 
