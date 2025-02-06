@@ -161,7 +161,6 @@ data_set_device
       |> Hok.get_gnx
       |> IO.inspect
 
-nn = Hok.get_gnx(nn_d)
 
 
 next = System.monotonic_time()
