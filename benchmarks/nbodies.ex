@@ -1,5 +1,4 @@
 require Hok
-Mix.install([{:random, "~> 0.2.4"}])
 
 Hok.defmodule_jit NBodies do
 
