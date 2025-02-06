@@ -31,7 +31,7 @@ Hok.defmodule_jit NBodies do
       p[2] = p[2] + p[5]*dt;
 
   end
-  defk map_2_para_no_resp_kernel(d_array,  step, par1, par2,size,f) do
+  defk map_step_2_para_no_resp_kernel(d_array,  step, par1, par2,size,f) do
 
 
     globalId  = blockDim.x * ( gridDim.x * blockIdx.y + blockIdx.x ) + threadIdx.x
