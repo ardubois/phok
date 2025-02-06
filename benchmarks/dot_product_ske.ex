@@ -117,5 +117,3 @@ next = System.monotonic_time()
 
 
 IO.puts "Hok\t#{n}\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
-Hok.null(vet1)
-Hok.null(vet2)
