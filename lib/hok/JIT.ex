@@ -38,6 +38,7 @@ def compile_function({name,type}) do
     {fast,fun_graph} ->
           delta = gen_delta_from_type(fast,type)
           IO.inspect "Delta: #{inspect delta}"
+          IO.inpsect "Type: #{inspect type}"
           IO.inspect "Call graph: #{inspect fun_graph}"
           inf_types = JIT.infer_types(fast,delta)
           #IO.inspect "inf_types: #{inspect inf_types}"
