@@ -157,7 +157,7 @@ data_set_device = Hok.new_gnx(data_set_host)
 
 data_set_device
       |> NN.map_step_2para_1resp(2,0.0,0.0,size, &NN.euclid/3)
-      |> NN.reduce(&NN.menor/2, 500.0)
+      |> NN.reduce(50000.0,&NN.menor/2)
       |> Hok.get_gnx
       |> IO.inspect
 
