@@ -70,7 +70,7 @@ Hok.defmodule_jit NN do
    tid = threadIdx.x + blockIdx.x * blockDim.x;
    cacheIndex = threadIdx.x
 
-   temp =0.0
+   temp = ref4[0]
 
    while (tid < n) do
      temp = f(a[tid], temp)
