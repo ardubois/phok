@@ -94,7 +94,7 @@ n = String.to_integer(arg)
 #vet2 = Hok.new_nx_from_function(1,n,{:f,32},fn -> :rand.uniform(1000) end)
 
 vet1 = Hok.new_nx_from_function(1,n,{:f,32},fn -> 1.0 end )
-vet1 = Nx.tensor([Enum.to_list(1..n)])
+vet2 = Nx.tensor([Enum.to_list(1..n)])
 
 prev = System.monotonic_time()
 
