@@ -754,7 +754,7 @@ def spawn_jit(k,t,b,l) do
   delta = JIT.gen_types_delta(kast,l)
   IO.inspect "Delta: #{inspect delta}"
   inf_types = JIT.infer_types(kast,delta)
-  IO.inspect "inf type: #{inspect types}"
+  IO.inspect "inf type: #{inspect inf_types}"
   subs = JIT.get_function_parameters(kast,l)
   IO.inspect subs
   kernel =JIT.compile_kernel(kast,inf_types,subs)
