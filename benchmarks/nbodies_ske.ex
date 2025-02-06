@@ -2,16 +2,17 @@ require Hok
 
 Hok.defmodule_jit NBodies do
 
-  defk gpu_nBodies(p,dt,n,softening) do
-    i = blockDim.x * blockIdx.x + threadIdx.x
-    if (i < n) do
-      fx = 0.0
-      fy = 0.0
-      fz = 0.0
-      for j in range(0,n) do
-        dx = p[6*j] - p[6*i];
-        dy = p[6*j+1] - p[6*i+1];
-        dz = p[6*j+2] - p[6*i+2];
+  defk gpu_nBodies(p,c,n) do
+    softening = 0.000000001
+    dt = 0.01
+    fx = 0.0
+    fy = 0.0
+    fz = 0.0
+
+    for j in range(0,n) do
+        dx = c[6*j] - p[0];
+        dy = c[6*j+1] - p[1];
+        dz = c[6*j+2] - p[2];
         distSqr = dx*dx + dy*dy + dz*dz + softening;
         invDist = 1.0/sqrt(distSqr);
         invDist3  = invDist * invDist * invDist;
@@ -20,20 +21,34 @@ Hok.defmodule_jit NBodies do
         fy = fy + dy * invDist3;
         fz = fz + dz * invDist3;
       end
-      p[6*i+3] = p[6*i+3]+ dt*fx;
-      p[6*i+4] = p[6*i+4]+ dt*fy;
-      p[6*i+5] = p[6*i+5]+ dt*fz;
+      p[3] = p[3]+ dt*fx;
+      p[4] = p[4]+ dt*fy;
+      p[5] = p[5]+ dt*fz;
     end
 
   end
-
   defk gpu_integrate(p, dt, n) do
-    i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n) do
-      p[6*i] = p[6*i] + p[6*i+3]*dt;
-      p[6*i+1] = p[6*i+1] + p[6*i+4]*dt;
-      p[6*i+2] = p[6*i+2] + p[6*i+5]*dt;
+      p[0] = p[0] + p[3]*dt;
+      p[1] = p[1] + p[4]*dt;
+      p[2] = p[2] + p[5]*dt;
     end
+  end
+  defk map_step_2_para_no_resp_kernel(d_array, step,  par1, par2,size,f) do
+
+
+    var globalId int = blockDim.x * ( gridDim.x * blockIdx.y + blockIdx.x ) + threadIdx.x
+
+    var id int = step * globalId
+    #f(id,id)
+    if (globalId < size) do
+      f(d_array+id)
+    end
+  end
+  def map_step_2_para_no_resp_kernel(d_array, step, par1, par2, size, f) do
+
+      Hok.spawn_jit(&NN.map_step_2para_1resp_kernel/7,{size,1,1},{1,1,1},[d_array,step,par1,par2,size,f])
+      d_array
   end
   def nbodies(-1,p,_dt,_softening,_n) do
     p
@@ -106,8 +121,8 @@ user_value = String.to_integer(arg)
 nBodies = user_value #3000;
 block_size =  128;
 nBlocks = floor ((nBodies + block_size - 1) / block_size)
-softening = 0.000000001;
-dt = 0.01; # time step
+softening = 0.000000001
+#dt = 0.01; # time step
 size_body = 6
 
 size_array = size_body * nBodies
@@ -123,13 +138,12 @@ prev = System.monotonic_time()
 
 d_buf = Hok.new_gnx(h_buf)
 
+gpu_resp = d_buf
+  |> map_step_2_para_no_resp_kernel(size_body,d_buf,nBodies,nBodies, &NBodies.gpu_nBodies/3)
+  |> map_step_2_para_no_resp_kernel(size_body, 0.01,nBodies,nBodies, &NBodies.gpu_nBodies/3)
+  |> Hok.get_gnx
+  |> IO.inspect
 
-Hok.spawn_jit(&NBodies.gpu_nBodies/4,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies,softening])
-#GPotion.synchronize()
-Hok.spawn_jit(&Integrate.gpu_integrate/3,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies])
-gpu_resp = Hok.get_gnx(d_buf)
-next = System.monotonic_time()
-IO.inspect gpu_resp
 IO.puts "PolyHok\t#{user_value}\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
 #IO.inspect gpu_resp
