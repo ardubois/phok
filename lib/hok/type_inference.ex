@@ -626,6 +626,7 @@ end
               IO.inspect map
               IO.inspect a1
               t1 = find_type_exp(map,a1)
+              IO.puts "depois"
               t2 = find_type_exp(map,a2)
               case t1 do
                 :none -> t2
