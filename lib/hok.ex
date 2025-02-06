@@ -748,15 +748,15 @@ end
 def spawn_jit(k,t,b,l) do
   {kast,fun_graph}  = load_ast(k)
   kernel_name = JIT.get_kernel_name(k)
-  #IO.inspect ast
+  IO.inspect "kernel name"
  # IO.inspect l
  #IO.puts "JIT"
   delta = JIT.gen_types_delta(kast,l)
-  IO.inspect "Delta: #{inspect delta}"
+#  IO.inspect "Delta: #{inspect delta}"
   inf_types = JIT.infer_types(kast,delta)
-  IO.inspect "inf type: #{inspect inf_types}"
+ # IO.inspect "inf type: #{inspect inf_types}"
   subs = JIT.get_function_parameters(kast,l)
-  IO.inspect subs
+  #IO.inspect subs
   kernel =JIT.compile_kernel(kast,inf_types,subs)
   #IO.inspect "kernel: #{inspect kernel}"
   funs=JIT.get_function_parameters_and_their_types(kast,l,inf_types)
@@ -764,7 +764,7 @@ def spawn_jit(k,t,b,l) do
                 |> Enum.map(fn x -> {x, inf_types[x]} end)
                 |> Enum.filter(fn {_,i} -> i != nil end)
   #IO.inspect funs
-  IO.inspect other_funs
+  #IO.inspect other_funs
   comp = Enum.map(funs++other_funs,&JIT.compile_function/1)
   comp = Enum.reduce(comp,[], fn x, y -> y++x end)
   #IO.puts comp
