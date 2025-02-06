@@ -748,9 +748,6 @@ end
 def spawn_jit(k,t,b,l) do
   {kast,fun_graph}  = load_ast(k)
   kernel_name = JIT.get_kernel_name(k)
-  IO.inspect "kernel name"
- # IO.inspect l
- #IO.puts "JIT"
   delta = JIT.gen_types_delta(kast,l)
 #  IO.inspect "Delta: #{inspect delta}"
   inf_types = JIT.infer_types(kast,delta)
