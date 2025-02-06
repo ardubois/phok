@@ -124,7 +124,7 @@ d_buf = Hok.new_gnx(h_buf)
 Hok.spawn_jit(&NBodies.gpu_nBodies/4,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies,softening])
 #GPotion.synchronize()
 Hok.spawn_jit(&Integrate.gpu_integrate/3,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies])
-_gpu_resp = GPotion.get_gnx(d_buf)
+_gpu_resp = Hok.get_gnx(d_buf)
 next = System.monotonic_time()
 IO.puts "GPotion\t#{user_value}\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
