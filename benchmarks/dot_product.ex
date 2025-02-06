@@ -34,7 +34,7 @@ include CAS
      threadsPerBlock = 256
      blocksPerGrid = div(size + threadsPerBlock - 1, threadsPerBlock)
      numberOfBlocks = blocksPerGrid
-     Hok.spawn_jit(&NN.reduce_kernel/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref, result_gpu, f, size])
+     Hok.spawn_jit(&DP.reduce_kernel/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref, result_gpu, f, size])
      result_gpu
  end
  defk reduce_kernel(a, ref4, f,n) do
