@@ -31,7 +31,7 @@ include CAS
     size = l*c
      result_gpu  = Hok.new_gnx(Nx.tensor([[acc]] , type: type))
 
-     threadsPerBlock = 256
+     threadsPerBlock = 512
      blocksPerGrid = div(size + threadsPerBlock - 1, threadsPerBlock)
      numberOfBlocks = blocksPerGrid
      Hok.spawn_jit(&DP.reduce_kernel/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref, result_gpu, f, size])
@@ -39,7 +39,7 @@ include CAS
  end
  defk reduce_kernel(a, ref4, f,n) do
 
-   __shared__ cache[256]
+   __shared__ cache[512]
 
    tid = threadIdx.x + blockIdx.x * blockDim.x;
    cacheIndex = threadIdx.x
