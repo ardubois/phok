@@ -4,11 +4,12 @@ Hok.defmodule_jit NBodies do
 
   defk gpu_nBodies(p,c,n) do
     softening = 0.000000001
+
+  if (i < n) do
     dt = 0.01
     fx = 0.0
     fy = 0.0
     fz = 0.0
-
     for j in range(0,n) do
         dx = c[6*j] - p[0];
         dy = c[6*j+1] - p[1];
