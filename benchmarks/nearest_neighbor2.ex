@@ -50,12 +50,12 @@ Hok.defmodule_jit NN do
   def euclid_seq_([],_lat,_lng, data) do
     data
   end
-  def reduce(ref,  f) do
+  def reduce(ref, acc, f) do
 
     {l,c} = Hok.get_shape_gnx(ref)
     type = Hok.get_type_gnx(ref)
     size = l*c
-     result_gpu  = Hok.new_gnx(Nx.tensor([[0]] , type: type))
+     result_gpu  = Hok.new_gnx(Nx.tensor([[acc]] , type: type))
 
      threadsPerBlock = 256
      blocksPerGrid = div(size + threadsPerBlock - 1, threadsPerBlock)
@@ -157,7 +157,7 @@ data_set_device = Hok.new_gnx(data_set_host)
 
 data_set_device
       |> NN.map_step_2para_1resp(2,0.0,0.0,size, &NN.euclid/3)
-      |> NN.reduce(&NN.menor/2)
+      |> NN.reduce(&NN.menor/2, 500.0)
       |> Hok.get_gnx
       |> IO.inspect
 
