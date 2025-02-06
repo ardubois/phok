@@ -605,12 +605,13 @@ end
 
   defp find_type_exp(map,exp) do
       case exp do
-         {{:., _, [Access, :get]}, _, [{arg1,_,_},_arg2]} ->
+         {{:., info_, [Access, :get]}, _, [{arg1,_,_},_arg2]} ->
            case map[arg1] do
              :tint -> :int
              :tdouble -> :double
              :tfloat -> :float
              nil ->  :none
+             ttt -> raise "Found type #{inspect ttt} for id #{inspect arg1} (#{inspect info_})"
            end
 
         {{:., _, [{_struct, _, nil}, _field]},_,[]} ->
