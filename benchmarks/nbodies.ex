@@ -112,8 +112,7 @@ size_body = 6
 size_matrex = size_body * nBodies
 
 
-h_buf = Matrex.random(1,size_matrex)
-
+h_buf = Hok.new_nx_from_function(1,n,{:f,32},fn -> :rand.uniform(1) end )
 
 prev = System.monotonic_time()
 
