@@ -5,7 +5,6 @@ Hok.defmodule_jit NBodies do
   defh gpu_nBodies(p,c,n) do
     softening = 0.000000001
 
-  if (i < n) do
     dt = 0.01
     fx = 0.0
     fy = 0.0
@@ -22,10 +21,9 @@ Hok.defmodule_jit NBodies do
         fy = fy + dy * invDist3;
         fz = fz + dz * invDist3;
       end
-      p[3] = p[3]+ dt*fx;
-      p[4] = p[4]+ dt*fy;
-      p[5] = p[5]+ dt*fz;
-    end
+  p[3] = p[3]+ dt*fx;
+  p[4] = p[4]+ dt*fy;
+  p[5] = p[5]+ dt*fz;
 
   end
   defh gpu_integrate(p, dt, n) do
