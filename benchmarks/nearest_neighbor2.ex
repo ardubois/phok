@@ -60,46 +60,53 @@ Hok.defmodule_jit NN do
      threadsPerBlock = 256
      blocksPerGrid = div(size + threadsPerBlock - 1, threadsPerBlock)
      numberOfBlocks = blocksPerGrid
-     Hok.spawn_jit(&DP.reduce_kernel/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref, result_gpu, f, size])
+     Hok.spawn_jit(&NN.reduce_kernel/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref, result_gpu, f, size])
      result_gpu
  end
- defk reduce_kernel(a, ref4, f,n) do
+defk reduce_kernel(a, ref4, f,n) do
 
-   __shared__ cache[256]
+  __shared__ cache[256]
 
-   tid = threadIdx.x + blockIdx.x * blockDim.x;
-   cacheIndex = threadIdx.x
+  tid = threadIdx.x + blockIdx.x * blockDim.x;
+  cacheIndex = threadIdx.x
 
-   temp =0.0
+  temp =0.0
 
-   while (tid < n) do
-     temp = f(a[tid], temp)
-     tid = blockDim.x * gridDim.x + tid
-   end
+  if (tid < n) do
+    temp = a[tid]
+    tid = blockDim.x * gridDim.x + tid
+  end
 
-   cache[cacheIndex] = temp
-     __syncthreads()
+  while (tid < n) do
+    temp = f(a[tid], temp)
+    tid = blockDim.x * gridDim.x + tid
+  end
 
-   i = blockDim.x/2
+  cache[cacheIndex] = temp
+    __syncthreads()
 
-   while (i != 0 ) do  ###&& tid < n) do
-     #tid = blockDim.x * gridDim.x + tid
-     if (cacheIndex < i) do
-       cache[cacheIndex] = f(cache[cacheIndex + i] , cache[cacheIndex])
-     end
+  i = blockDim.x/2
+  #tid = threadIdx.x + blockIdx.x * blockDim.x;
+  up = blockDim.x * gridDim.x *256
+  while (i != 0 &&  (cacheIndex + up)< n) do  ###&& tid < n) do
+    #tid = blockDim.x * gridDim.x + tid
+    if (cacheIndex < i) do
+      cache[cacheIndex] = f(cache[cacheIndex + i] , cache[cacheIndex])
+    end
 
-   __syncthreads()
-   i = i/2
-   end
+  __syncthreads()
+  i = i/2
+  end
 
- if (cacheIndex == 0) do
-   current_value = ref4[0]
-   while(!(current_value == atomic_cas(ref4,current_value,f(cache[0],current_value)))) do
-     current_value = ref4[0]
-   end
- end
+if (cacheIndex == 0) do
+  current_value = ref4[0]
+  while(!(current_value == atomic_cas(ref4,current_value,f(cache[0],current_value)))) do
+    current_value = ref4[0]
+  end
+end
 
- end  defk map_step_2para_1resp_kernel(d_array, d_result, step,  par1, par2,size,f) do
+end
+  defk map_step_2para_1resp_kernel(d_array, d_result, step,  par1, par2,size,f) do
 
 
     var globalId int = blockDim.x * ( gridDim.x * blockIdx.y + blockIdx.x ) + threadIdx.x
