@@ -87,6 +87,8 @@ n = String.to_integer(arg)
 {vet1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
 {vet2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
 
+IO.inspect vet1
+
 #vet1 = Nx.iota({1,n}, type: :f32)
 #vet2 = Nx.iota({1,n}, type: :f32)
 
