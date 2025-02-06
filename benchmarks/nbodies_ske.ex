@@ -43,12 +43,12 @@ Hok.defmodule_jit NBodies do
     var id int = step * globalId
     #f(id,id)
     if (globalId < size) do
-      f(d_array+id)
+      f(d_array+id,par1,par2)
     end
   end
-  def map_step_2_para_no_resp_kernel(d_array, step, par1, par2, size, f) do
+  def map_step_2_para_no_resp(d_array, step, par1, par2, size, f) do
 
-      Hok.spawn_jit(&NN.map_step_2para_1resp_kernel/7,{size,1,1},{1,1,1},[d_array,step,par1,par2,size,f])
+      Hok.spawn_jit(&NBodies.map_step_2_para_no_resp_kernel/6,{size,1,1},{1,1,1},[d_array,step,par1,par2,size,f])
       d_array
   end
   def nbodies(-1,p,_dt,_softening,_n) do
