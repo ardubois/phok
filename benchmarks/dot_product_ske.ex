@@ -24,7 +24,7 @@ include CAS
 
       result_gpu
   end
-  def reduce(ref,  f) do
+  def reduce(ref, initial, f) do
 
      {l,c} = Hok.get_shape_gnx(ref)
      type = Hok.get_type_gnx(ref)
@@ -34,17 +34,17 @@ include CAS
       threadsPerBlock = 256
       blocksPerGrid = div(size + threadsPerBlock - 1, threadsPerBlock)
       numberOfBlocks = blocksPerGrid
-      Hok.spawn_jit(&DP.reduce_kernel/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref, result_gpu, f, size])
+      Hok.spawn_jit(&DP.reduce_kernel/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref, initial,result_gpu, f, size])
       result_gpu
   end
-  defk reduce_kernel(a, ref4, f,n) do
+  defk reduce_kernel(a, initial, ref4, f,n) do
 
     __shared__ cache[256]
 
     tid = threadIdx.x + blockIdx.x * blockDim.x;
     cacheIndex = threadIdx.x
 
-    temp =0.0
+    temp = initial # 0.0
 
     while (tid < n) do
       temp = f(a[tid], temp)
@@ -109,7 +109,7 @@ ref2 = Hok.new_gnx(vet2)
 
 result = ref1
     |> DP.map2(ref2, Hok.hok fn (a,b) -> a * b end)
-    |> DP.reduce(Hok.hok fn (a,b) -> a + b end)
+    |> DP.reduce(0.0,Hok.hok fn (a,b) -> a + b end)
     |> Hok.get_gnx
 
 IO.inspect result
