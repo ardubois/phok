@@ -50,12 +50,12 @@ Hok.defmodule_jit NN do
   def euclid_seq_([],_lat,_lng, data) do
     data
   end
-  def reduce(ref, acc, f) do
+  def reduce(ref,  f) do
 
     {l,c} = Hok.get_shape_gnx(ref)
     type = Hok.get_type_gnx(ref)
     size = l*c
-     result_gpu  = Hok.new_gnx(Nx.tensor([[acc]] , type: type))
+     result_gpu  = Hok.new_gnx(Nx.tensor([[0]] , type: type))
 
      threadsPerBlock = 256
      blocksPerGrid = div(size + threadsPerBlock - 1, threadsPerBlock)
@@ -63,43 +63,49 @@ Hok.defmodule_jit NN do
      Hok.spawn_jit(&NN.reduce_kernel/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref, result_gpu, f, size])
      result_gpu
  end
- defk reduce_kernel(a, ref4, f,n) do
+defk reduce_kernel(a, ref4, f,n) do
 
-   __shared__ cache[256]
+  __shared__ cache[256]
 
-   tid = threadIdx.x + blockIdx.x * blockDim.x;
-   cacheIndex = threadIdx.x
+  tid = threadIdx.x + blockIdx.x * blockDim.x;
+  cacheIndex = threadIdx.x
 
-   temp = ref4[0]
+  temp =0.0
 
-   while (tid < n) do
-     temp = f(a[tid], temp)
-     tid = blockDim.x * gridDim.x + tid
-   end
+  if (tid < n) do
+    temp = a[tid]
+    tid = blockDim.x * gridDim.x + tid
+  end
 
-   cache[cacheIndex] = temp
-     __syncthreads()
+  while (tid < n) do
+    temp = f(a[tid], temp)
+    tid = blockDim.x * gridDim.x + tid
+  end
 
-   i = blockDim.x/2
+  cache[cacheIndex] = temp
+    __syncthreads()
 
-   while (i != 0 ) do  ###&& tid < n) do
-     #tid = blockDim.x * gridDim.x + tid
-     if (cacheIndex < i) do
-       cache[cacheIndex] = f(cache[cacheIndex + i] , cache[cacheIndex])
-     end
+  i = blockDim.x/2
+  #tid = threadIdx.x + blockIdx.x * blockDim.x;
+  up = blockDim.x * gridDim.x *256
+  while (i != 0 &&  (cacheIndex + up)< n) do  ###&& tid < n) do
+    #tid = blockDim.x * gridDim.x + tid
+    if (cacheIndex < i) do
+      cache[cacheIndex] = f(cache[cacheIndex + i] , cache[cacheIndex])
+    end
 
-   __syncthreads()
-   i = i/2
-   end
+  __syncthreads()
+  i = i/2
+  end
 
- if (cacheIndex == 0) do
-   current_value = ref4[0]
-   while(!(current_value == atomic_cas(ref4,current_value,f(cache[0],current_value)))) do
-     current_value = ref4[0]
-   end
- end
+if (cacheIndex == 0) do
+  current_value = ref4[0]
+  while(!(current_value == atomic_cas(ref4,current_value,f(cache[0],current_value)))) do
+    current_value = ref4[0]
+  end
+end
 
- end
+end
   defk map_step_2para_1resp_kernel(d_array, d_result, step,  par1, par2,size,f) do
 
 
@@ -124,12 +130,16 @@ Hok.defmodule_jit NN do
     end
 
   defh menor(x,y) do
-    if (x<y) do
+    if y == 0.0 do
+      x
+    else
+     if (x<y) do
       x
      else
        y
      end
     end
+  end
 end
 
 
@@ -142,28 +152,26 @@ list_data_set = DataSet.gen_data_set(size)
 
 data_set_host = Nx.tensor([list_data_set], type: {:f,32})
 
-IO.inspect data_set_host
+#tensor = Nx.tensor([Enum.reverse(Enum.to_list(1..size))], type: {:f,32})
+tensor = Nx.tensor([Enum.reverse(Enum.to_list(1..500))++ [-1]++ Enum.reverse(Enum.to_list(1..500))], type: {:f,32})
 
-#tensor = Nx.tensor([Enum.reverse(Enum.to_list(1..500))++ [-1]++ Enum.reverse(Enum.to_list(1..500))], type: {:f,32})
+tensor
+|> Hok.new_gnx
+|> NN.reduce(&NN.menor/2)
+|> Hok.get_gnx
+|> IO.inspect
 
-#tensor
-#|> Hok.new_gnx
-#|> NN.reduce(&NN.menor/2)
-#|> Hok.get_gnx
-#|> IO.inspect
-
-#raise "hell"
+raise "hell"
 
 prev = System.monotonic_time()
 data_set_device = Hok.new_gnx(data_set_host)
 
-data_set_device
+nn_d = data_set_device
       |> NN.map_step_2para_1resp(2,0.0,0.0,size, &NN.euclid/3)
-      |> NN.reduce(50000.0,&NN.menor/2)
-      |> Hok.get_gnx
-      |> IO.inspect
+      |> NN.reduce(&NN.menor/2)
 
 
+_nn = Hok.get_gnx(nn_d)
 
 next = System.monotonic_time()
 IO.puts "Hok\t#{size}\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"

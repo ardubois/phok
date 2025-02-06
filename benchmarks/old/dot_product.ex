@@ -24,54 +24,54 @@ include CAS
 
       result_gpu
   end
-  def reduce(ref, initial, f) do
+  def reduce(ref, acc, f) do
 
-     {l,c} = Hok.get_shape_gnx(ref)
-     type = Hok.get_type_gnx(ref)
-     size = l*c
-      result_gpu  = Hok.new_gnx(Nx.tensor([[0]] , type: type))
+    {l,c} = Hok.get_shape_gnx(ref)
+    type = Hok.get_type_gnx(ref)
+    size = l*c
+     result_gpu  = Hok.new_gnx(Nx.tensor([[acc]] , type: type))
 
-      threadsPerBlock = 256
-      blocksPerGrid = div(size + threadsPerBlock - 1, threadsPerBlock)
-      numberOfBlocks = blocksPerGrid
-      Hok.spawn_jit(&DP.reduce_kernel/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref, initial,result_gpu, f, size])
-      result_gpu
-  end
-  defk reduce_kernel(a, initial, ref4, f,n) do
+     threadsPerBlock = 512
+     blocksPerGrid = div(size + threadsPerBlock - 1, threadsPerBlock)
+     numberOfBlocks = blocksPerGrid
+     Hok.spawn_jit(&DP.reduce_kernel/4,{numberOfBlocks,1,1},{threadsPerBlock,1,1},[ref, result_gpu, f, size])
+     result_gpu
+ end
+ defk reduce_kernel(a, ref4, f,n) do
 
-    __shared__ cache[256]
+   __shared__ cache[512]
 
-    tid = threadIdx.x + blockIdx.x * blockDim.x;
-    cacheIndex = threadIdx.x
+   tid = threadIdx.x + blockIdx.x * blockDim.x;
+   cacheIndex = threadIdx.x
 
-    temp = initial # 0.0
+   temp = ref4[0]
 
-    while (tid < n) do
-      temp = f(a[tid], temp)
-      tid = blockDim.x * gridDim.x + tid
-    end
+   while (tid < n) do
+     temp = f(a[tid], temp)
+     tid = blockDim.x * gridDim.x + tid
+   end
 
-    cache[cacheIndex] = temp
-      __syncthreads()
+   cache[cacheIndex] = temp
+     __syncthreads()
 
-    i = blockDim.x/2
+   i = blockDim.x/2
 
-    while (i != 0 ) do  ###&& tid < n) do
-      #tid = blockDim.x * gridDim.x + tid
-      if (cacheIndex < i) do
-        cache[cacheIndex] = f(cache[cacheIndex + i] , cache[cacheIndex])
-      end
+   while (i != 0 ) do  ###&& tid < n) do
+     #tid = blockDim.x * gridDim.x + tid
+     if (cacheIndex < i) do
+       cache[cacheIndex] = f(cache[cacheIndex + i] , cache[cacheIndex])
+     end
 
-    __syncthreads()
-    i = i/2
-    end
+   __syncthreads()
+   i = i/2
+   end
 
-  if (cacheIndex == 0) do
-    current_value = ref4[0]
-    while(!(current_value == atomic_cas(ref4,current_value,f(cache[0],current_value)))) do
-      current_value = ref4[0]
-    end
-  end
+ if (cacheIndex == 0) do
+   current_value = ref4[0]
+   while(!(current_value == atomic_cas(ref4,current_value,f(cache[0],current_value)))) do
+     current_value = ref4[0]
+   end
+ end
 
   end
   def replicate(n, x), do: (for _ <- 1..n, do: x)
@@ -87,8 +87,7 @@ n = String.to_integer(arg)
 #{vet1,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
 #{vet2,_} = Nx.Random.uniform(Nx.Random.key(1), shape: {1, n}, type: :f32)
 
-vet1 = Hok.new_nx_from_function(1,n,{:f,32},fn -> 1.0 end )
-vet2 = Hok.new_nx_from_function(1,n,{:f,32},fn -> 1.0 end )
+#IO.inspect vet1
 
 #vet1 = Nx.iota({1,n}, type: :f32)
 #vet2 = Nx.iota({1,n}, type: :f32)
@@ -96,8 +95,14 @@ vet2 = Hok.new_nx_from_function(1,n,{:f,32},fn -> 1.0 end )
 #vet1 = Hok.new_nx_from_function(1,n,{:f,32},fn -> :rand.uniform(1000) end )
 #vet2 = Hok.new_nx_from_function(1,n,{:f,32},fn -> :rand.uniform(1000) end)
 
-#vet1 = Hok.new_nx_from_function(1,n,{:f,32},fn -> 1.0 end )
-#vet2 = Nx.tensor([Enum.to_list(1..n)], type: {:f,32})
+
+vet1 = Hok.new_nx_from_function(1,n,{:f,32},fn -> 1.0 end )
+vet2 = Hok.new_nx_from_function(1,n,{:f,32},fn -> 1.0 end )
+
+#vet1 = Nx.tensor([Enum.to_list(1..n)], type: {:f,32})
+
+#vet1 = Nx.tensor(DP.replicate(n,1))
+#vet2 = Nx.tensor(DP.replicate(n,1))
 
 prev = System.monotonic_time()
 
