@@ -109,11 +109,7 @@ result = ref1
     |> DP.reduce(Hok.hok fn (a,b) -> a + b end)
     |> Hok.get_gnx
 
-
-
 IO.inspect result
-
-
 
 next = System.monotonic_time()
 
