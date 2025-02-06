@@ -124,10 +124,7 @@ Hok.defmodule_jit NN do
     end
 
   defh menor(x,y) do
-    if y == 0.0 do
-      x
-    else
-     if (x<y) do
+    if (x<y) do
       x
      else
        y
