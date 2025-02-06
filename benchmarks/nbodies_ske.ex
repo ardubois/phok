@@ -126,9 +126,9 @@ size_body = 6
 
 
 
-h_buf = Hok.new_nx_from_function(nBodies,size_body,{:f,32},fn -> :rand.uniform() end )
+#h_buf = Hok.new_nx_from_function(nBodies,size_body,{:f,32},fn -> :rand.uniform() end )
 
-#h_buf = Hok.new_nx_from_function(nBodies,size_body,{:f,32},fn -> 1 end )
+h_buf = Hok.new_nx_from_function(nBodies,size_body,{:f,32},fn -> 1 end )
 
 #IO.inspect h_buf
 
