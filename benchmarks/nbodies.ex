@@ -113,11 +113,9 @@ size_body = 6
 size_array = size_body * nBodies
 
 
-#h_buf = Hok.new_nx_from_function(1,size_array,{:f,32},fn -> :rand.uniform() end )
+h_buf = Hok.new_nx_from_function(1,size_array,{:f,32},fn -> :rand.uniform() end )
 
-h_buf = Hok.new_nx_from_function(1,size_array,{:f,32},fn -> 1 end )
-
-#IO.inspect h_buf
+#h_buf = Hok.new_nx_from_function(1,size_array,{:f,32},fn -> 1 end )
 
 prev = System.monotonic_time()
 
@@ -125,11 +123,12 @@ d_buf = Hok.new_gnx(h_buf)
 
 
 Hok.spawn_jit(&NBodies.gpu_nBodies/4,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies,softening])
-#GPotion.synchronize()
+
 Hok.spawn_jit(&Integrate.gpu_integrate/3,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies])
-gpu_resp = Hok.get_gnx(d_buf)
+_gpu_resp = Hok.get_gnx(d_buf)
 next = System.monotonic_time()
 IO.inspect gpu_resp
+
 IO.puts "PolyHok\t#{user_value}\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
 #IO.inspect gpu_resp
