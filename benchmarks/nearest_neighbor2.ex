@@ -155,12 +155,14 @@ data_set_host = Nx.tensor([list_data_set], type: {:f,32})
 prev = System.monotonic_time()
 data_set_device = Hok.new_gnx(data_set_host)
 
-nn_d = data_set_device
+data_set_device
       |> NN.map_step_2para_1resp(2,0.0,0.0,size, &NN.euclid/3)
       |> NN.reduce(&NN.menor/2)
+      |> Hok.get_gnx
+      |> IO.inspect
 
+nn = Hok.get_gnx(nn_d)
 
-_nn = Hok.get_gnx(nn_d)
 
 next = System.monotonic_time()
 IO.puts "Hok\t#{size}\t#{System.convert_time_unit(next-prev,:native,:millisecond)}"
