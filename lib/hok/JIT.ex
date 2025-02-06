@@ -53,6 +53,7 @@ def compile_function({name,type}) do
 
 
           fun_type =  Map.get(inf_types,:return)
+          fun_type = if (fun_type == :unit) then :void else fun_type
 
           cuda_body = Hok.CudaBackend.gen_cuda_jit(body,inf_types,param_vars,"module",MapSet.new())
           k =        Hok.CudaBackend.gen_function(fname,param_list,cuda_body,fun_type)
