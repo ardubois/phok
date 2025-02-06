@@ -136,7 +136,7 @@ prev = System.monotonic_time()
 
 d_buf = Hok.new_gnx(h_buf)
 
-gpu_resp = d_buf
+_gpu_resp = d_buf
   |> NBodies.map_2_para_no_resp(d_buf,nBodies,nBodies, &NBodies.gpu_nBodies/3)
   |> NBodies.map_2_para_no_resp( 0.01,nBodies,nBodies, &NBodies.gpu_integrate/3)
   |> Hok.get_gnx
