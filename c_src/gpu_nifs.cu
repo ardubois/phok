@@ -145,9 +145,11 @@ char* compile_to_ptx(ErlNifEnv *env, char* program_source) {
         if(rv != NVRTC_SUCCESS) fail_nvrtc(env,rv,"nvrtcGetProgramLog");
         assert(log[log_size - 1] == '\0');
 
-        printf("Compile error; log: %s\n", log);
+        printf("Compilation error; log: %s\n", log);
 
         fail_nvrtc(env,erro_g,"nvrtcCompileProgram");
+        return enif_make_int(env, 0);
+
     }
     // get ptx code
     size_t ptx_size;
