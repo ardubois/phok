@@ -27,7 +27,7 @@ end
 Hok.defmodule_jit RayTracer do
 
 
-defh raytracing(image, width,  spheres ) do
+defh raytracing(image, width,  spheres ,x,y) do
 
 
 
@@ -69,10 +69,10 @@ defh raytracing(image, width,  spheres ) do
     end
   end
 
-  image[offset * 4 + 0] = r * 255
-  image[offset * 4 + 1] = g * 255
-  image[offset * 4 + 2] = b * 255
-  image[offset * 4 + 3] = 255
+  image[0] = r * 255
+  image[1] = g * 255
+  image[2] = b * 255
+  image[3] = 255
 
 end
 
@@ -85,7 +85,7 @@ defk mapxy_2D_step_2_para_no_resp_kernel(d_array,  step, par1, par2,size,f) do
    id  = step * offset
   #f(id,id)
   if (offset < (size*size)) do
-    f(d_array+id,par1,par2)
+    f(d_array+id,par1,par2,x,y)
   end
 end
 def mapxy_2D_para_no_resp(d_array,  step,par1, par2, size, f) do
