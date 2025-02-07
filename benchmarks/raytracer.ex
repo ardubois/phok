@@ -124,28 +124,18 @@ defmodule Main do
         :rand.uniform() *x
         #x * Random.randint(1, 32767) / 32767
     end
+    def sphereMaker2(0), do: []
+    def sphereMaker2(n) do
+      [
+        Main.rnd(1),
+        Main.rnd(1),
+        Main.rnd(1),
+        Main.rnd(100.0) + 20;
+        Main.rnd( 1000.0) - 500;
+        Main.rndrnd( 1000.0 ) - 500;
+        Main.rndrnd( 1000.0 ) - 500;
+        | sphereMaker2(n - 1)]
 
-    def sphereMaker2(1, radius, sum) do
-      [
-        Main.rnd(1),
-        Main.rnd(1),
-        Main.rnd(1),
-        Main.rnd(radius) + sum,
-        Main.rnd(Main.dim) - trunc(Main.dim / 2),
-        Main.rnd(Main.dim) - trunc(Main.dim / 2),
-        Main.rnd(256) - 128 #hardcoded
-        ]
-    end
-    def sphereMaker2(n, radius, sum) do
-      [
-        Main.rnd(1),
-        Main.rnd(1),
-        Main.rnd(1),
-        Main.rnd(radius) + sum,
-        Main.rnd(Main.dim) - trunc(Main.dim / 2),
-        Main.rnd(Main.dim) - trunc(Main.dim / 2),
-        Main.rnd(256) - 128
-      | sphereMaker2(n - 1, radius, sum)]
     end
 
     def spherePrinter([]) do
@@ -194,18 +184,8 @@ defmodule Main do
     end
 
     def main do
-        {radius, sum} = cond do
-          Main.dim == 256 -> {20, 5}
-          Main.dim == 1024 -> {80, 20}
-          Main.dim == 2048 -> {120, 20}
-          Main.dim == 3072 -> {160, 20}
-          Main.dim == 4096 -> {160, 20}
-          Main.dim == 5120 -> {160, 20}
-          Main.dim == 6144 -> {160, 20}
-          Main.dim == 7168 -> {160,20}
-          true     -> {160,20}
-        end
-        sphereList = Nx.tensor([sphereMaker2(Main.spheres, radius, sum)], type: {:f,32})
+
+        sphereList = Nx.tensor(sphereMaker2(Main.spheres, radius, sum), type: {:f,32})
 
         width = Main.dim
         height = width
