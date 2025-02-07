@@ -117,8 +117,8 @@ end
 
 defmodule Main do
     def rnd(x) do
-        #:rand.uniform() *x
-        x * Random.randint(1, 32767) / 32767
+        :rand.uniform() *x
+        #x * Random.randint(1, 32767) / 32767
     end
 
     def sphereMaker2(1, radius, sum) do
@@ -201,7 +201,7 @@ defmodule Main do
           Main.dim == 7168 -> {160,20}
           true     -> {160,20}
         end
-        sphereList = Nx.tensor([sphereMaker2(Main.spheres, radius, sum)], type: {:f,32})
+        sphereList = Nx.tensor([sphereMaker2(Main.spheres, radius, sum)], type: {:s,32})
 
         width = Main.dim
         height = width
