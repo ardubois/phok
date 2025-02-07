@@ -1,8 +1,5 @@
 require Hok
 import Bitwise
-Mix.install([{:random, "~> 0.2.4"}])
-
-Random.seed(313)
 
 #Random.seed(313)
 
