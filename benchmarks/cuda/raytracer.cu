@@ -88,10 +88,10 @@ void loadSpheres(Sphere *vet, int size, float dim, float radius, float sum){
             sphere.r = rnd(1.0);
             sphere.b = rnd(1.0);
             sphere.g = rnd(1.0);
-            sphere.radius = rnd(radius) + sum;
-            sphere.x = rnd(dim) - trunc(dim / 2);
-            sphere.y = rnd(dim) - trunc(dim / 2);
-            sphere.z = rnd(256) - 128;
+            sphere.radius = rnd( 100.0f ) + 20
+            sphere.x = rnd( 1000.0f ) - 500;;
+            sphere.y = rnd( 1000.0f ) - 500;;
+            sphere.z = rnd( 1000.0f ) - 500;;
 
             vet[i] = sphere;
             
