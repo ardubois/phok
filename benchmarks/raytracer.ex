@@ -8,12 +8,19 @@ defmodule BMP do
   def load_nifs do
       :erlang.load_nif('./priv/bmp_nifs', 0)
   end
-  def gen_bmp_nif(_string,_dim,_mat) do
+  def gen_bmp_int_nif(_string,_dim,_mat) do
       raise "gen_bmp_nif not implemented"
   end
-  def gen_bmp(string,dim,%Nx.Tensor{data: data, type: type, shape: shape, names: name}) do
+  def gen_bmp_float_nif(_string,_dim,_mat) do
+    raise "gen_bmp_nif not implemented"
+end
+  def gen_bmp_int(string,dim,%Nx.Tensor{data: data, type: type, shape: shape, names: name}) do
     %Nx.BinaryBackend{ state: array} = data
-    gen_bmp_nif(string,dim,array)
+    gen_bmp_int_nif(string,dim,array)
+  end
+  def gen_bmp_float(string,dim,%Nx.Tensor{data: data, type: type, shape: shape, names: name}) do
+    %Nx.BinaryBackend{ state: array} = data
+    gen_bmp_int_float_nif(string,dim,array)
   end
 end
 
@@ -198,7 +205,7 @@ defmodule Main do
           Main.dim == 7168 -> {160,20}
           true     -> {160,20}
         end
-        sphereList = Nx.tensor([sphereMaker2(Main.spheres, radius, sum)], type: {:s,32})
+        sphereList = Nx.tensor([sphereMaker2(Main.spheres, radius, sum)], type: {:f,32})
 
         width = Main.dim
         height = width
@@ -209,7 +216,7 @@ defmodule Main do
         prev = System.monotonic_time()
 
         refSphere = Hok.new_gnx(sphereList)
-        refImag = Hok.new_gnx(1, width  * height  * 4,{:s,32})
+        refImag = Hok.new_gnx(1,width * height  * 4,{:s,32})
 
         Hok.spawn_jit(&RayTracer.raytracing/4,{trunc(width/16),trunc(height/16),1},{16,16,1},[width, height, refSphere, refImag])
 
