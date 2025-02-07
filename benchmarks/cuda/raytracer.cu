@@ -149,7 +149,7 @@ int main(int argc, char *argv[]){
     int   *dev_image;
     Sphere * s;
 
-    final_image = (float*) malloc(dim * dim * sizeof(int)*4);
+    final_image = (int*) malloc(dim * dim * sizeof(int)*4);
     Sphere *temp_s = (Sphere*)malloc( sizeof(Sphere) * SPHERES );
     
     loadSpheres(temp_s, SPHERES, dim, 160, 20);
@@ -172,7 +172,7 @@ int main(int argc, char *argv[]){
 
     kernel<<<grids,threads>>>(dim, s, dev_image);
 
-    cudaMemcpy( final_image, dev_image, dim * dim * sizeof(float) * 4,cudaMemcpyDeviceToHost );
+    cudaMemcpy( final_image, dev_image, dim * dim * sizeof(int) * 4,cudaMemcpyDeviceToHost );
         
     cudaFree( dev_image);
     cudaFree( s );
