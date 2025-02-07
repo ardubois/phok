@@ -17,10 +17,10 @@ defmodule BMP do
   end
 end
 
-defmodule RayTracer do
-import GPotion
+Hok.defmodule_jit RayTracer do
 
-gpotion raytracing(width, height, spheres, image) do
+
+defk raytracing(width, height, spheres, image) do
 
   x = threadIdx.x + blockIdx.x * blockDim.x
   y = threadIdx.y + blockIdx.y * blockDim.y
@@ -197,7 +197,7 @@ defmodule Main do
           Main.dim == 7168 -> {160,20}
           true     -> {160,20}
         end
-        sphereList = Matrex.new([sphereMaker2(Main.spheres, radius, sum)])
+        sphereList = Nx.tensor([sphereMaker2(Main.spheres, radius, sum)], type: {:f,32})
 
         width = Main.dim
         height = width
@@ -207,14 +207,12 @@ defmodule Main do
 
         prev = System.monotonic_time()
 
-        refSphere = GPotion.new_gmatrex(sphereList)
-        refImag = GPotion.new_gmatrex(1, (width)  * (height)  * 4)
+        refSphere = Hok.new_gnx(sphereList)
+        refImag = Hok.new_gnx(1, width  * height  * 4,{:s,32})
 
-        kernel = GPotion.load(&RayTracer.raytracing/4)
-        GPotion.spawn(kernel,{trunc(width/16),trunc(height/16),1},{16,16,1},[width, height, refSphere, refImag])
-        GPotion.synchronize()
+        Hok.spawn_jit(&RayTracer.raytracing/4,{trunc(width/16),trunc(height/16),1},{16,16,1},[width, height, refSphere, refImag])
 
-        image = GPotion.get_gmatrex(refImag)
+        image = Hok.get_gnx(refImag)
 
         next = System.monotonic_time()
         IO.puts "GPotion\t#{width}\t#{System.convert_time_unit(next-prev,:native,:millisecond)} "
