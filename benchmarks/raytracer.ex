@@ -206,7 +206,7 @@ defmodule Main do
         IO.puts "GPotion\t#{width}\t#{System.convert_time_unit(next-prev,:native,:millisecond)} "
 
 
-        BMP.gen_bmp_float('ray.bmp',width,image)
+        BMP.gen_bmp_int('ray.bmp',width,image)
 
         #image = Matrex.to_list(image)
 
