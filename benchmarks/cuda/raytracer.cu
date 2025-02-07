@@ -36,7 +36,7 @@ typedef struct {
     bitmapinfoheader bitmapinfoheader;
 } bitmap;
 #pragma pack(pop)
-void genBpm (int height, int width, float *pixelbuffer_f) {
+void genBpm (int height, int width, int *pixelbuffer_f) {
     uint32_t pixelbytesize = height*width*_bitsperpixel/8;
     uint32_t  _filesize =pixelbytesize+sizeof(bitmap);
     FILE *fp = fopen("test.bmp","wb");
@@ -101,7 +101,7 @@ void loadSpheres(Sphere *vet, int size, float dim, float radius, float sum){
 
 #define SPHERES 20
 
-__global__ void kernel(int dim, Sphere * s,  float *ptr ) {
+__global__ void kernel(int dim, Sphere * s,  int *ptr ) {
     int x = threadIdx.x + blockIdx.x * blockDim.x;
     int y = threadIdx.y + blockIdx.y * blockDim.y;
     int offset = x + y * blockDim.x * gridDim.x;
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]){
     float   *dev_image;
     Sphere * s;
 
-    final_image = (float*) malloc(dim * dim * sizeof(float)*4);
+    final_image = (float*) malloc(dim * dim * sizeof(int)*4);
     Sphere *temp_s = (Sphere*)malloc( sizeof(Sphere) * SPHERES );
     
     loadSpheres(temp_s, SPHERES, dim, 160, 20);
