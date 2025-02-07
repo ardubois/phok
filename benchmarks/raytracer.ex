@@ -134,7 +134,7 @@ defmodule Main do
         Main.rnd( dim ) - trunc(dim/2),
         Main.rnd( dim ) - trunc(dim/2),
         Main.rnd( dim ) - trunc(dim/2)
-        | sphereMaker2(n - 1)]
+        | sphereMaker2(n - 1,dim)]
 
     end
 
