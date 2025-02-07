@@ -20,7 +20,7 @@ end
   end
   def gen_bmp_float(string,dim,%Nx.Tensor{data: data, type: type, shape: shape, names: name}) do
     %Nx.BinaryBackend{ state: array} = data
-    gen_bmp_int_float_nif(string,dim,array)
+    gen_bmp_float_nif(string,dim,array)
   end
 end
 
