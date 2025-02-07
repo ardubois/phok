@@ -154,7 +154,7 @@ int main(int argc, char *argv[]){
     
     loadSpheres(temp_s, SPHERES, dim, 160, 20);
 
-
+   printf("before\n");
 
     float time;
     cudaEvent_t start, stop;   
@@ -166,14 +166,16 @@ int main(int argc, char *argv[]){
     cudaMalloc( (void**)&s, sizeof(Sphere) * SPHERES );
     
     cudaMemcpy( s, temp_s, sizeof(Sphere) * SPHERES, cudaMemcpyHostToDevice );
-
+   printf("after alloc\n");
     dim3    grids(dim/16,dim/16);
     dim3    threads(16,16);
 
     kernel<<<grids,threads>>>(dim, s, dev_image);
+   printf("after kernel\n");
 
     cudaMemcpy( final_image, dev_image, dim * dim * sizeof(int) * 4,cudaMemcpyDeviceToHost );
-        
+        printf("after copy back\n");
+   
     cudaFree( dev_image);
     cudaFree( s );
     
