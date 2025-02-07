@@ -185,7 +185,7 @@ defmodule Main do
 
     def main do
 
-        sphereList = Nx.tensor([sphereMaker2(Main.spheres, radius, sum)], type: {:f,32})
+        sphereList = Nx.tensor([sphereMaker2(Main.spheres)], type: {:f,32})
 
         width = Main.dim
         height = width
