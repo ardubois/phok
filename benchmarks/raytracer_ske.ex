@@ -171,7 +171,7 @@ defmodule Main do
         ref_sphere = Hok.new_gnx(sphereList)
         ref_image = Hok.new_gnx(1,width * height  * 4,{:s,32})
 
-        RayTracer.mapxy_2D_para_no_resp(ref_image, 4,width, ref_sphere, width, &RayTracer.raytracing/3)
+        RayTracer.mapxy_2D_para_no_resp(ref_image, 4,width, ref_sphere, width, &RayTracer.raytracing/5)
 
        # Hok.spawn_jit(&RayTracer.raytracing/4,{trunc(width/16),trunc(height/16),1},{16,16,1},[width, height, refSphere, refImag])
 
