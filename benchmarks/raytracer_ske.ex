@@ -95,47 +95,6 @@ def mapxy_2D_para_no_resp(d_array,  step,par1, par2, size, f) do
 end
 
 end
-
-
-defmodule Bmpgen do
-  def fileHeaderSize do #constant
-    14
-  end
-
-  def infoHeaderSize do #constant
-    40
-  end
-
-  def bytes_per_pixel do
-    4
-  end
-  def recursiveWrite([]) do
-    IO.puts("done!")
-  end
-  def recursiveWrite([0.0, 0.0, 0.0, 0.0 | _rest]) do
-    IO.puts("rest of the list is empty. Finalizing write.")
-  end
-
-  #def recursiveWrite([a | image], i, max) do
-  def recursiveWrite([r, g, b, 255.0 | image]) do
-    l = [<<trunc(g)>>, <<trunc(b)>>, <<trunc(r)>>, <<255>>]
-    File.write!("img-gpuraytracer-#{Main.dim}x#{Main.dim}.bmp", l, [:append])
-    recursiveWrite(image)
-  end
-
-  def writeFileHeader(height, stride) do
-    fileSize = Bmpgen.fileHeaderSize + Bmpgen.infoHeaderSize + (stride * height)
-    fileHeader = ['B'] ++ ['M'] ++ [<<fileSize>>] ++ [<<fileSize >>> 8>>] ++ [<<fileSize >>> 16>>] ++ [<<fileSize >>> 24>>] ++ List.duplicate(<<0>>, 4) ++ [<<Bmpgen.fileHeaderSize + Bmpgen.infoHeaderSize>>] ++ List.duplicate(<<0>>, 3)
-    IO.puts("\n-----------------------\n")
-    File.write!("img-gpuraytracer-#{Main.dim}x#{Main.dim}.bmp", fileHeader)
-  end
-
-  def writeInfoHeader(height, width) do
-    infoHeader = [<<Bmpgen.infoHeaderSize>>] ++ List.duplicate(<<0>>, 3) ++ [<<width>>, <<width >>> 8>>, <<width >>> 16>>, <<width >>> 24>>, <<height>>, <<height >>> 8>>, <<height >>> 16>>, <<height >>> 24>>, <<1>>, <<0>>, <<Bmpgen.bytes_per_pixel * 8>>] ++ List.duplicate(<<0>>, 25)
-    File.write!("img-gpuraytracer-#{Main.dim}x#{Main.dim}.bmp", infoHeader, [:append])
-  end
-end
-
 defmodule Main do
     def rnd(x) do
         :rand.uniform() *x
