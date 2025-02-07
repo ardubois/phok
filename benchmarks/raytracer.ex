@@ -124,16 +124,16 @@ defmodule Main do
         :rand.uniform() *x
         #x * Random.randint(1, 32767) / 32767
     end
-    def sphereMaker2(0), do: []
-    def sphereMaker2(n) do
+    def sphereMaker2(0,_dim), do: []
+    def sphereMaker2(n,dim) do
       [
         Main.rnd(1),
         Main.rnd(1),
         Main.rnd(1),
-        Main.rnd(100.0) + 20,
-        Main.rnd( 1000.0) - 500,
-        Main.rnd( 1000.0 ) - 500,
-        Main.rnd( 1000.0 ) - 500
+        Main.rnd(trunc(dim/10)) + (dim/50),
+        Main.rnd( dim ) - trunc(dim/2),
+        Main.rnd( dim ) - trunc(dim/2),
+        Main.rnd( dim ) - trunc(dim/2)
         | sphereMaker2(n - 1)]
 
     end
@@ -185,7 +185,7 @@ defmodule Main do
 
     def main do
 
-        sphereList = Nx.tensor([sphereMaker2(Main.spheres)], type: {:f,32})
+        sphereList = Nx.tensor([sphereMaker2(Main.spheres,Main.dim)], type: {:f,32})
 
         width = Main.dim
         height = width
