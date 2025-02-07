@@ -212,17 +212,17 @@ defmodule Main do
 
         prev = System.monotonic_time()
 
-        refSphere = Hok.new_gnx(sphereList)
-        refImag = Hok.new_gnx(1,width * height  * 4,{:s,32})
+        ref_sphere = Hok.new_gnx(sphereList)
+        ref_image = Hok.new_gnx(1,width * height  * 4,{:s,32})
 
-        RayTracer.mapxy_2D_para_no_resp(ref_image, 4,width, refSphere, width, &RayTracer.raytracing/3)
+        RayTracer.mapxy_2D_para_no_resp(ref_image, 4,width, ref_sphere, width, &RayTracer.raytracing/3)
 
        # Hok.spawn_jit(&RayTracer.raytracing/4,{trunc(width/16),trunc(height/16),1},{16,16,1},[width, height, refSphere, refImag])
 
-        image = Hok.get_gnx(refImag)
+        image = Hok.get_gnx(ref_image)
 
         next = System.monotonic_time()
-        IO.puts "GPotion\t#{width}\t#{System.convert_time_unit(next-prev,:native,:millisecond)} "
+        IO.puts "PolyHok\t#{width}\t#{System.convert_time_unit(next-prev,:native,:millisecond)} "
 
 
         BMP.gen_bmp_int('ray.bmp',width,image)
