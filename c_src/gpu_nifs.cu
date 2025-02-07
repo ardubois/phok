@@ -1619,4 +1619,4 @@ static ErlNifFunc nif_funcs[] = {
     {"synchronize_nif", 0, synchronize_nif}
 };
 
-ERL_NIF_INIT(Elixir.PolyHok, nif_funcs, &load, NULL, NULL, NULL)
+ERL_NIF_INIT(Elixir.Hok, nif_funcs, &load, NULL, NULL, NULL)
