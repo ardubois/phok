@@ -14,11 +14,11 @@ defmodule BMP do
   def gen_bmp_float_nif(_string,_dim,_mat) do
     raise "gen_bmp_nif not implemented"
 end
-  def gen_bmp_int(string,dim,%Nx.Tensor{data: data, type: type, shape: shape, names: name}) do
+  def gen_bmp_int(string,dim,%Nx.Tensor{data: data, type: _type, shape: _shape, names: _name}) do
     %Nx.BinaryBackend{ state: array} = data
     gen_bmp_int_nif(string,dim,array)
   end
-  def gen_bmp_float(string,dim,%Nx.Tensor{data: data, type: type, shape: shape, names: name}) do
+  def gen_bmp_float(string,dim,%Nx.Tensor{data: data, type: _type, shape: _shape, names: _name}) do
     %Nx.BinaryBackend{ state: array} = data
     gen_bmp_float_nif(string,dim,array)
   end
