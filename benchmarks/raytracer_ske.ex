@@ -1,7 +1,4 @@
 require Hok
-import Bitwise
-
-#Random.seed(313)
 
 defmodule BMP do
   @on_load :load_nifs
