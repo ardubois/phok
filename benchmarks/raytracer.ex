@@ -1,4 +1,3 @@
-Mix.install([{:random, "~> 0.2.4"}])
 require Hok
 import Bitwise
 
@@ -114,7 +113,7 @@ end
 
 defmodule Main do
     def rnd(x) do
-        x * Random.randint(1, 32767) / 32767
+        :rand.uniform() *x
     end
 
     def sphereMaker2(1, radius, sum) do
