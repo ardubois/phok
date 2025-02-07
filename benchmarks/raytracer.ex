@@ -216,7 +216,7 @@ defmodule Main do
         prev = System.monotonic_time()
 
         refSphere = Hok.new_gnx(sphereList)
-        refImag = Hok.new_gnx(1,width * height  * 4,{:s,32})
+        refImag = Hok.new_gnx(1,width * height  * 4,{:f,32})
 
         Hok.spawn_jit(&RayTracer.raytracing/4,{trunc(width/16),trunc(height/16),1},{16,16,1},[width, height, refSphere, refImag])
 
@@ -226,7 +226,7 @@ defmodule Main do
         IO.puts "GPotion\t#{width}\t#{System.convert_time_unit(next-prev,:native,:millisecond)} "
 
 
-        BMP.gen_bmp('ray.bmp',width,image)
+        BMP.gen_bmp_float('ray.bmp',width,image)
 
         #image = Matrex.to_list(image)
 
