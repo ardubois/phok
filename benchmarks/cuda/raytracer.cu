@@ -151,7 +151,7 @@ int main(int argc, char *argv[]){
 
     final_image = (int*) malloc(dim * dim * sizeof(int)*4);
     Sphere *temp_s = (Sphere*)malloc( sizeof(Sphere) * SPHERES );
-    
+    printf("before load sphres");
     loadSpheres(temp_s, SPHERES, dim, 160, 20);
 
    printf("before\n");
