@@ -132,8 +132,8 @@ defmodule Main do
         Main.rnd(1),
         Main.rnd(100.0) + 20,
         Main.rnd( 1000.0) - 500,
-        Main.rndrnd( 1000.0 ) - 500,
-        Main.rndrnd( 1000.0 ) - 500
+        Main.rnd( 1000.0 ) - 500,
+        Main.rnd( 1000.0 ) - 500
         | sphereMaker2(n - 1)]
 
     end
