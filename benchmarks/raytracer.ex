@@ -11,8 +11,9 @@ defmodule BMP do
   def gen_bmp_nif(_string,_dim,_mat) do
       raise "gen_bmp_nif not implemented"
   end
-  def gen_bmp(string,dim,%Matrex{data: matrix} = _a) do
-    gen_bmp_nif(string,dim,matrix)
+  def gen_bmp(string,dim,%Nx.Tensor{data: data, type: type, shape: shape, names: name}) do
+    %Nx.BinaryBackend{ state: array} = data
+    gen_bmp_nif(string,dim,array)
   end
 end
 
