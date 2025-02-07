@@ -39,7 +39,7 @@ typedef struct {
 void genBpm (int height, int width, int *pixelbuffer_f) {
     uint32_t pixelbytesize = height*width*_bitsperpixel/8;
     uint32_t  _filesize =pixelbytesize+sizeof(bitmap);
-    FILE *fp = fopen("test.bmp","wb");
+    FILE *fp = fopen("raycuda.bmp","wb");
     bitmap *pbitmap  = (bitmap*)calloc(1,sizeof(bitmap));
 
     int buffer_size = height*width*4;
@@ -184,7 +184,7 @@ int main(int argc, char *argv[]){
     cudaEventElapsedTime(&time, start, stop) ;
 
      printf("CUDA\t%d\t%3.1f\n", dim,time);
-    // genBpm(dim,dim,final_image);
+     genBpm(dim,dim,final_image);
     
     free(temp_s);
     free(final_image);
