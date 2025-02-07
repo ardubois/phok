@@ -130,10 +130,10 @@ defmodule Main do
         Main.rnd(1),
         Main.rnd(1),
         Main.rnd(1),
-        Main.rnd(100.0) + 20;
-        Main.rnd( 1000.0) - 500;
-        Main.rndrnd( 1000.0 ) - 500;
-        Main.rndrnd( 1000.0 ) - 500;
+        Main.rnd(100.0) + 20,
+        Main.rnd( 1000.0) - 500,
+        Main.rndrnd( 1000.0 ) - 500,
+        Main.rndrnd( 1000.0 ) - 500,
         | sphereMaker2(n - 1)]
 
     end
@@ -185,7 +185,7 @@ defmodule Main do
 
     def main do
 
-        sphereList = Nx.tensor(sphereMaker2(Main.spheres, radius, sum), type: {:f,32})
+        sphereList = Nx.tensor([sphereMaker2(Main.spheres, radius, sum)], type: {:f,32})
 
         width = Main.dim
         height = width
